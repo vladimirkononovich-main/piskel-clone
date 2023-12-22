@@ -1,0 +1,40 @@
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 36px;
+  background-color: #2d2d2d;
+  margin-bottom: 8px;
+  font-family: Arial, sans-serif;
+}
+h1 {
+  display: flex;
+  margin: 0 15px;
+  height: 24px;
+  width: 85px;
+}
+.header__logo {
+  font-size: small;
+}
+.header__title {
+  color: #888;
+  font-size: 16pt;
+  text-shadow: 0 -1px 0 #000;
+  word-break: normal;
+}
+.header__create-sprite-button {
+  font-size: 13px;
+  background-color: gold;
+  color: black;
+  height: 24px;
+  line-height: 24px;
+  padding: 0 10px;
+  border-style: none;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: bold;
+  text-align: center;
+  margin: 6px 6px 6px 0;
+  text-decoration: none;
+}

@@ -1,0 +1,30 @@
+.main {
+  flex-basis: 100%;
+  display: flex;
+  overflow: hidden;
+}
+.main__left-section {
+  flex-basis: 225px;
+}
+.main__middle-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #999;
+  flex-basis: 1430px;
+  max-width: 1430px;
+  overflow: hidden;
+}
+.main__right-section {
+  flex-basis: 265px;
+}
+.main__drawing-canvas {
+  z-index: 0;
+  background: url(../../assets/canvas-background-img.png);
+  background-position: center;
+}
+
+.main__canvas-wrapper {
+  display: flex;
+  outline: 2px solid blue;
+}
