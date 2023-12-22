@@ -1,95 +1,82 @@
 import React, { forwardRef, useEffect, useRef, useState } from "react";
 import "./main.css";
-
-interface IPixel {
-  x: number;
-  y: number;
-  isFilled: boolean;
-}
+import { IDrawingCanvas, IPixel } from "./models";
 
 const Main = () => {
   const drawingCanvasRef = useRef(null);
-  const [drawingCanvasSize, setDrawingCanvasSize] = useState({
+  const [drawingCanvas, setDrawingCanvas] = useState<IDrawingCanvas>({
     width: 50,
     height: 40,
+    scale: 1,
+    ctx: null,
+    matrix: null,
   });
-  const [drawingCanvasScale, setDrawingCanvasScale] = useState(20);
-  const [drawingCanvasMatrix, setDrawingCanvasMatrix] = useState<
-    IPixel[][] | null
-  >(null);
-
-  let drawingCanvas: HTMLCanvasElement;
-  let ctx: CanvasRenderingContext2D;
+  const canvasWidth = drawingCanvas.width * drawingCanvas.scale;
+  const pixelSize = canvasWidth / drawingCanvas.width;
 
   useEffect(() => {
-    drawingCanvas = drawingCanvasRef.current!;
-    ctx = drawingCanvas.getContext("2d")!;
-  });
+    let canvas: HTMLCanvasElement = drawingCanvasRef.current!;
+    drawingCanvas.ctx = canvas.getContext("2d");
+    initializeDrawingCanvasMatrix();
+  }, []);
 
   useEffect(() => {
-    initializeDrawingCanvas();
-  }, [drawingCanvasScale]);
+    updateDrawingCanvasMatrix();
+  }, [drawingCanvas.scale]);
 
-  useEffect(() => {
-    updateDrawingCanvas();
-  }, [drawingCanvasMatrix]);
+  const updateDrawingCanvasMatrix = () => {
+    if (!drawingCanvas.matrix) return;
+    const copyMatrix = Array.from(drawingCanvas.matrix);
+    copyMatrix.length = drawingCanvas.height;
 
-  const initializeDrawingCanvas = () => {
-    const canvasWidth = drawingCanvasSize.width * drawingCanvasScale;
-    const pixelSize = canvasWidth / drawingCanvasSize.width;
+    const newDrawingCanvasMatrix = Array.from(copyMatrix, (row, rowIndex) => {
+      const copyMatrixRow = Array.from(row);
+      copyMatrixRow.length = drawingCanvas.width;
 
-    if (drawingCanvasMatrix)
-      drawingCanvasMatrix.length = drawingCanvasSize.height;
+      return Array.from(copyMatrixRow, (pixel, pixelIndex) => {
+        return {
+          ...pixel,
+          y: rowIndex * pixelSize,
+          x: pixelIndex * pixelSize,
+        };
+      });
+    });
+    updateDrawingCanvas(newDrawingCanvasMatrix);
+    setDrawingCanvas({ ...drawingCanvas, matrix: newDrawingCanvasMatrix });
+  };
 
-    const rows: IPixel[][] =
-      drawingCanvasMatrix || Array(drawingCanvasSize.height);
-
-    const newDrawingCanvasMatrix: IPixel[][] = Array.from(
-      rows,
+  const initializeDrawingCanvasMatrix = () => {
+    const newDrawingCanvasMatrix = Array.from(
+      Array(drawingCanvas.height),
       (row, rowIndex) => {
-        if (drawingCanvasMatrix) {
-          drawingCanvasMatrix[rowIndex].length = drawingCanvasSize.width;
-
-          return Array.from(row, (pixel, pixelIndex) => {
-            return {
-              ...pixel,
-              y: rowIndex * pixelSize,
-              x: pixelIndex * pixelSize,
-            };
-          });
-        }
-
-        return Array.from(
-          Array(drawingCanvasSize.width),
-          (pixel, pixelIndex) => {
-            return {
-              y: rowIndex * pixelSize,
-              x: pixelIndex * pixelSize,
-              isFilled: false,
-            };
-          }
-        );
+        return Array.from(Array(drawingCanvas.width), (pixel, pixelIndex) => {
+          return {
+            y: rowIndex * pixelSize,
+            x: pixelIndex * pixelSize,
+            isFilled: false,
+          };
+        });
       }
     );
 
-    setDrawingCanvasMatrix(newDrawingCanvasMatrix);
+    updateDrawingCanvas(newDrawingCanvasMatrix);
+    setDrawingCanvas({ ...drawingCanvas, matrix: newDrawingCanvasMatrix });
   };
 
-  const updateDrawingCanvas = () => {
-    if (!drawingCanvas) return;
-    if (!drawingCanvasMatrix) return;
+  const updateDrawingCanvas = (matrix: IPixel[][]) => {
+    if (!drawingCanvas.matrix) return;
 
-    const canvasWidth = drawingCanvasSize.width * drawingCanvasScale;
-    const canvasHeight = drawingCanvasSize.height * drawingCanvasScale;
-    const pixelSize = canvasWidth / drawingCanvasSize.width;
+    const canvasWidth = drawingCanvas.width * drawingCanvas.scale;
+    const canvasHeight = drawingCanvas.height * drawingCanvas.scale;
+    const pixelSize = canvasWidth / drawingCanvas.width;
 
-    ctx.clearRect(0, 0, canvasWidth, canvasHeight);
+    drawingCanvas.ctx!.clearRect(0, 0, canvasWidth, canvasHeight);
 
-    drawingCanvasMatrix.forEach((row, rowIndex) => {
+    matrix.forEach((row, rowIndex) => {
       row.forEach((pixel, pixelIndex) => {
         if (!pixel.isFilled) return;
 
-        ctx.fillRect(pixel.x, pixel.y, pixelSize, pixelSize);
+        drawingCanvas.ctx!.fillRect(pixel.x, pixel.y, pixelSize, pixelSize);
       });
     });
   };
@@ -97,26 +84,26 @@ const Main = () => {
   const fillDrawingCanvasPixel = (
     e: React.MouseEvent<HTMLCanvasElement, MouseEvent>
   ) => {
-    if (!drawingCanvasMatrix) return;
+    if (!drawingCanvas.matrix) return;
 
-    const canvasWidth = drawingCanvasSize.width * drawingCanvasScale;
-    const pixelSize = canvasWidth / drawingCanvasSize.width;
+    const canvasWidth = drawingCanvas.width * drawingCanvas.scale;
+    const pixelSize = canvasWidth / drawingCanvas.width;
 
     const pixelIndex = Math.floor(e.nativeEvent.offsetX / pixelSize);
     const rowIndex = Math.floor(e.nativeEvent.offsetY / pixelSize);
 
-    const pixel = drawingCanvasMatrix[rowIndex][pixelIndex];
+    const pixel = drawingCanvas.matrix[rowIndex][pixelIndex];
     pixel.isFilled = true;
 
-    ctx.fillRect(pixel.x, pixel.y, pixelSize, pixelSize);
+    drawingCanvas.ctx!.fillRect(pixel.x, pixel.y, pixelSize, pixelSize);
   };
 
   const drawingCanvasHandler = (e: React.WheelEvent<HTMLDivElement>) => {
     if (Math.sign(e.deltaY) === -1)
-      setDrawingCanvasScale(drawingCanvasScale + 1);
+      setDrawingCanvas({ ...drawingCanvas, scale: drawingCanvas.scale + 1 });
 
     if (Math.sign(e.deltaY) === 1)
-      setDrawingCanvasScale(drawingCanvasScale - 1);
+      setDrawingCanvas({ ...drawingCanvas, scale: drawingCanvas.scale - 1 });
   };
 
   return (
@@ -131,8 +118,8 @@ const Main = () => {
           onClick={(e) => {
             fillDrawingCanvasPixel(e);
           }}
-          width={drawingCanvasSize.width * drawingCanvasScale}
-          height={drawingCanvasSize.height * drawingCanvasScale}
+          width={drawingCanvas.width * drawingCanvas.scale}
+          height={drawingCanvas.height * drawingCanvas.scale}
           ref={drawingCanvasRef}
         ></canvas>
       </div>
