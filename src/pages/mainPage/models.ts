@@ -7,6 +7,5 @@ export interface IDrawingCanvas {
   width: number;
   height: number;
   scale: number;
-  ctx: CanvasRenderingContext2D | null;
   matrix: IPixel[][] | null;
 }
