@@ -9,3 +9,7 @@ export interface IDrawingCanvas {
   scale: number;
   matrix: IPixel[][] | null;
 }
+export interface IDrawingTools {
+  penSize: number;
+  penSizes: number[];
+}

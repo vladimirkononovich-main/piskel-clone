@@ -18,9 +18,9 @@ const Main = () => {
   return (
     <main className="main">
       <div className="main__left-section">
-        <div className="main__drawing-tools-wrapper">
+        {/* <div className="main__drawing-tools-wrapper"> */}
           <DrawingTools />
-        </div>
+        {/* </div> */}
       </div>
       <div className="main__middle-section" onWheel={drawingCanvasHandler}>
         <DrawingCanvas />

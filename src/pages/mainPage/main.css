@@ -4,7 +4,53 @@
   overflow: hidden;
 }
 .main__left-section {
+  display: flex;
   flex-basis: 225px;
+}
+.main__drawing-tools {
+  width: 95px;
+  height: 500px;
+  align-self: center;
+}
+.main__pen-size-container {
+  padding: 5px 5px;
+  display: flex;
+}
+.main__pen-size {
+  cursor: pointer;
+  box-sizing: border-box;
+  width: 20px;
+  height: 20px;
+  border: 2px solid #444;
+  margin-right: 2px;
+}
+.main__pen-size_selected {
+  border-color: gold;
+}
+.main__pen-size:before {
+  content: "";
+  width: 100%;
+  height: 100%;
+  background-color: white;
+  display: block;
+  text-align: center;
+  line-height: 12px;
+  font-size: 90%;
+}
+.main__pen-size_selected::before {
+  background-color: gold;
+}
+.main__pen-size[data-size="1"] {
+  padding: 5px;
+}
+.main__pen-size[data-size="2"] {
+  padding: 4px;
+}
+.main__pen-size[data-size="3"] {
+  padding: 3px;
+}
+.main__pen-size[data-size="4"] {
+  padding: 2px;
 }
 .main__middle-section {
   display: flex;
@@ -23,7 +69,6 @@
   background: url(../../assets/canvas-background-img.png);
   background-position: center;
 }
-
 .main__canvas-wrapper {
   display: flex;
   outline: 2px solid blue;
