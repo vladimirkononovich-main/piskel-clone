@@ -6,7 +6,7 @@ export const store = configureStore({
   reducer: {
     drawingCanvas: drawingCanvasSlice,
     drawingTools: drawingToolsSlice,
-  },
+  }
 });
 
 export type RootState = ReturnType<typeof store.getState>;

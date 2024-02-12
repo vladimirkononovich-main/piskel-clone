@@ -1,91 +1,242 @@
-import React, { useEffect, useRef } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { off } from "process";
+import React, { useEffect, useRef, useState } from "react";
+import { windowPressedMouseButton } from "../../../App";
+import {  useAppSelector } from "../../../hooks";
 import { RootState } from "../../../store";
-import { IPixel } from "../models";
-import { setMatrix } from "./drawingCanvasSlice";
+import { drawingToolFunctions } from "../DrawingTools/tools";
+import {  IDrawingToolFunctions, IPixel } from "../models";
 
-function DrawingCanvas() {
+let matrix: IPixel[][] | null = null;
+
+function DrawingCanvas({
+  middleSectionRef,
+}: {
+  middleSectionRef: React.MutableRefObject<null>;
+}) {
+  let middleSection: HTMLDivElement;
   const drawingCanvasRef = useRef(null);
-  const drawingCanvas = useSelector((state: RootState) => state.drawingCanvas);
-  const dispatch = useDispatch();
-
-  const canvasWidth = drawingCanvas.width * drawingCanvas.scale;
-  const pixelSize = canvasWidth / drawingCanvas.width;
-
+  const drawingTools = useAppSelector((state: RootState) => state.drawingTools);
+  const drawingCanvas = useAppSelector(
+    (state: RootState) => state.drawingCanvas
+  );
+  const currentTool =
+    drawingToolFunctions[
+      drawingTools.currentToolName as keyof IDrawingToolFunctions
+    ];
   let drawingCanvasHTML: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
 
   useEffect(() => {
     drawingCanvasHTML = drawingCanvasRef.current!;
-    ctx = drawingCanvasHTML.getContext("2d")!;
-    if (!drawingCanvas.matrix) initializeDrawingCanvasMatrix();
+    middleSection = middleSectionRef.current!;
+    ctx = drawingCanvasHTML.getContext("2d", { willReadFrequently: true })!;
+    if (!matrix) initDrawingCanvasMatrix();
   });
 
   useEffect(() => {
-    updateDrawingCanvasMatrix();
+    const widthWithScale = drawingCanvas.width * drawingCanvas.scale;
+    const heightWithScale = drawingCanvas.height * drawingCanvas.scale;
+
+    drawingCanvasHTML.width = Math.min(
+      widthWithScale,
+      middleSection.clientWidth
+    );
+    drawingCanvasHTML.height = Math.min(
+      heightWithScale,
+      middleSection.clientHeight
+    );
+
+    scaleDrawingCanvas();
   }, [drawingCanvas.scale]);
 
-  const updateDrawingCanvasMatrix = () => {
-    if (!drawingCanvas.matrix) return;
-    const copyMatrix = Array.from(drawingCanvas.matrix);
-    copyMatrix.length = drawingCanvas.height;
-
-    const newDrawingCanvasMatrix = Array.from(copyMatrix, (row, rowIndex) => {
-      const copyMatrixRow = Array.from(row);
-      copyMatrixRow.length = drawingCanvas.width;
-
-      return Array.from(copyMatrixRow, (pixel, pixelIndex) => {
+  const initDrawingCanvasMatrix = () => {
+    matrix = Array.from(Array(drawingCanvas.height), () => {
+      return Array.from(Array(drawingCanvas.width), () => {
         return {
-          ...pixel,
-          y: rowIndex * pixelSize,
-          x: pixelIndex * pixelSize,
+          colorRGBA: {
+            red: "0",
+            green: "0",
+            blue: "0",
+            alpha: "0",
+          },
         };
       });
     });
-    updateDrawingCanvas(newDrawingCanvasMatrix);
-    dispatch(setMatrix(newDrawingCanvasMatrix));
   };
 
-  const initializeDrawingCanvasMatrix = () => {
-    const newDrawingCanvasMatrix = Array.from(
-      Array(drawingCanvas.height),
-      (row, rowIndex) => {
-        return Array.from(Array(drawingCanvas.width), (pixel, pixelIndex) => {
-          return {
-            y: rowIndex * pixelSize,
-            x: pixelIndex * pixelSize,
-            isFilled: false,
-          };
-        });
-      }
+  const scaleDrawingCanvas = () => {
+    if (!matrix) return;
+    const middleSectionWidth = middleSection.clientWidth;
+    const middleSectionHeight = middleSection.clientHeight;
+    const canvasWidthToScale = drawingCanvas.width * drawingCanvas.scale;
+    const canvasHeightToScale = drawingCanvas.height * drawingCanvas.scale;
+    const scale = drawingCanvas.scale;
+    const height = drawingCanvas.height;
+    const width = drawingCanvas.width;
+    const visibleWidth = Math.min(canvasWidthToScale, middleSectionWidth);
+    const visibleHeight = Math.min(canvasHeightToScale, middleSectionHeight);
+
+    const overflowY = Math.floor(
+      (canvasHeightToScale - visibleHeight) / 2 / scale
+    );
+    const overflowX = Math.floor(
+      (canvasWidthToScale - visibleWidth) / 2 / scale
+    );
+    const rowHeight = Math.floor(
+      (visibleHeight - (height - overflowY * 2 - 2) * scale) / 2
+    );
+    const pixelWidth = Math.floor(
+      (visibleWidth - (width - overflowX * 2 - 2) * scale) / 2
+    );
+    const pixelWidthRemainder =
+      (visibleWidth - (width - overflowX * 2 - 2) * scale) % 2;
+
+    const imageData: ImageData | null = ctx.getImageData(
+      0,
+      0,
+      visibleWidth,
+      visibleHeight
     );
 
-    updateDrawingCanvas(newDrawingCanvasMatrix);
-    dispatch(setMatrix(newDrawingCanvasMatrix));
+    const matrixStart = overflowY;
+    const matrixEnd = height - overflowY - 1;
+    const rowStart = overflowX;
+    const rowEnd = width - overflowX - 1;
+    let curr = 0;
+
+    for (let rowI = matrixStart; rowI <= matrixEnd; rowI++) {
+      let currRowHeight = scale;
+      if (rowI === matrixStart || rowI === matrixEnd) currRowHeight = rowHeight;
+
+      for (let i = 0; i < currRowHeight; i++) {
+        for (let pxlI = rowStart; pxlI <= rowEnd; pxlI++) {
+          const pixelAlpha = +matrix[rowI][pxlI].colorRGBA.alpha;
+          let currPixelWidth = 4 * scale;
+          if (pxlI === rowStart) currPixelWidth = 4 * pixelWidth;
+          if (pxlI === rowEnd) currPixelWidth = 4 * pixelWidth;
+
+          for (let j = 1; j <= currPixelWidth; j++) {
+            if (j % 4 === 0) imageData!.data[curr] = pixelAlpha;
+            curr += 1;
+          }
+        }
+        if (pixelWidthRemainder) curr += 4;
+      }
+    }
+
+    ctx.putImageData(imageData, 0, 0);
   };
 
-  const updateDrawingCanvas = (matrix: IPixel[][]) => {
-    if (!drawingCanvas.matrix) return;
-
-    const canvasWidth = drawingCanvas.width * drawingCanvas.scale;
-    const canvasHeight = drawingCanvas.height * drawingCanvas.scale;
-    const pixelSize = canvasWidth / drawingCanvas.width;
-
-    ctx!.clearRect(0, 0, canvasWidth, canvasHeight);
-
-    matrix.forEach((row, rowIndex) => {
-      row.forEach((pixel, pixelIndex) => {
-        if (!pixel.isFilled) return;
-        ctx!.fillRect(pixel.x, pixel.y, pixelSize, pixelSize);
-      });
-    });
+  const mouseDownHandler = (
+    e: React.MouseEvent<HTMLCanvasElement, MouseEvent>
+  ) => {
+    const args = {
+      e,
+      matrix,
+      scale: drawingCanvas.scale,
+      rgba: drawingTools.colorRGBALeftClick,
+      ctx,
+    };
+    currentTool(args);
   };
+
+  // const connectTwoPixels = (
+  //   e: React.MouseEvent<HTMLCanvasElement, MouseEvent>
+  // ) => {
+  //   const endX = Math.floor(e.nativeEvent.offsetX / pixelSize);
+  //   const endY = Math.floor(e.nativeEvent.offsetY / pixelSize);
+
+  //   let y = 25;
+  //   let x = 25;
+
+  //   const yInterval = endY > y ? endY - y + 1 : y - endY + 1 || 1;
+  //   const xInterval = endX > x ? endX - x + 1 : x - endX + 1;
+  //   const yDirection = endY > y ? 1 : -1;
+  //   const xDirection = endX > x ? 1 : -1;
+
+  //   let connectionWay: number[][][] = [];
+
+  //   const avgStep = Math.floor(
+  //     Math.max(yInterval, xInterval) / Math.min(yInterval, xInterval)
+  //   );
+  //   const remainder =
+  //     Math.max(yInterval, xInterval) % Math.min(yInterval, xInterval);
+  //   const defaultUnitsCount = Math.min(yInterval, xInterval) - remainder;
+  //   const enlargedUnitsCount = remainder;
+
+  //   if (!remainder) {
+  //     connectionWay[0] = [];
+  //     connectionWay[0].length = Math.min(yInterval, xInterval);
+  //     connectionWay[0].fill(Array(avgStep).fill(1));
+  //   }
+
+  //   const moreUnits = Math.max(defaultUnitsCount, enlargedUnitsCount);
+  //   const fewerUnits = Math.min(defaultUnitsCount, enlargedUnitsCount);
+  //   const interval = Math.floor(moreUnits / (fewerUnits + 1));
+  //   const intervalRemainder = moreUnits % (fewerUnits + 1);
+  //   connectionWay.length = fewerUnits;
+
+  //   const intervalUnits = Array.from(Array(interval), (v, index) => {
+  //     if (enlargedUnitsCount > defaultUnitsCount) {
+  //       return Array(avgStep + 1).fill(1);
+  //     }
+  //     return Array(avgStep).fill(1);
+  //   });
+
+  //   connectionWay = Array.from(connectionWay, () => {
+  //     if (enlargedUnitsCount > defaultUnitsCount) {
+  //       return [...intervalUnits, Array(avgStep).fill(1)];
+  //     }
+  //     return [...intervalUnits, Array(avgStep + 1).fill(1)];
+  //   });
+  //   connectionWay.push(intervalUnits);
+
+  //   if (intervalRemainder) {
+  //     const middle = Math.ceil((fewerUnits + 1) / 2);
+  //     let increment = 1;
+  //     let decrement = 1;
+  //     const intervalRemainderWay = [];
+
+  //     for (let i = 0; i < intervalRemainder; i++) {
+  //       if (!i) {
+  //         intervalRemainderWay[i] = middle;
+  //         continue;
+  //       }
+  //       if (i % 2) {
+  //         intervalRemainderWay[i] = middle - decrement;
+  //         decrement += 1;
+  //       } else {
+  //         intervalRemainderWay[i] = middle + increment;
+  //         increment += 1;
+  //       }
+  //     }
+  //     intervalRemainderWay.forEach((pos) => {
+  //       if (enlargedUnitsCount > defaultUnitsCount) {
+  //         connectionWay[pos - 1].unshift(Array(avgStep + 1).fill(1));
+  //         return;
+  //       }
+  //       connectionWay[pos - 1].unshift(Array(avgStep).fill(1));
+  //     });
+  //   }
+
+  //   connectionWay.forEach((currInterval) => {
+  //     currInterval.forEach((column) => {
+  //       column.forEach((pos) => {
+  //         // const pixel = intermediateMatrix[y][x];
+  //         // pixel.isFilled = true;
+  //         if (yInterval >= xInterval) y += yDirection;
+  //         else x += xDirection;
+  //       });
+  //       if (yInterval >= xInterval) x += xDirection;
+  //       else y += yDirection;
+  //     });
+  //   });
+  // };
 
   return (
     <canvas
+      onMouseDown={mouseDownHandler}
       className="main__drawing-canvas"
-      width={drawingCanvas.width * drawingCanvas.scale}
-      height={drawingCanvas.height * drawingCanvas.scale}
       ref={drawingCanvasRef}
     ></canvas>
   );

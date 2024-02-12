@@ -1,16 +1,20 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
+import { useAppDispatch } from "../../hooks";
 import { RootState } from "../../store";
 import DrawingCanvas from "./DrawingCanvas/DrawingCanvas";
 import { setScale } from "./DrawingCanvas/drawingCanvasSlice";
 import DrawingTools from "./DrawingTools/DrawingTools";
 import "./main.css";
+import { DrawingCanvasMatrix } from "./models";
 
 const Main = () => {
   const drawingCanvas = useSelector((state: RootState) => state.drawingCanvas);
-  const dispatch = useDispatch();
+  const dispatch = useAppDispatch();
+  const middleSectionRef = useRef(null);
 
-  const drawingCanvasHandler = (e: React.WheelEvent<HTMLDivElement>) => {
+
+  const changeDrawingCanvasScale = (e: React.WheelEvent<HTMLDivElement>) => {
     if (Math.sign(e.deltaY) === -1) dispatch(setScale(drawingCanvas.scale + 1));
     if (Math.sign(e.deltaY) === 1) dispatch(setScale(drawingCanvas.scale - 1));
   };
@@ -18,12 +22,10 @@ const Main = () => {
   return (
     <main className="main">
       <div className="main__left-section">
-        {/* <div className="main__drawing-tools-wrapper"> */}
-          <DrawingTools />
-        {/* </div> */}
+        <DrawingTools />
       </div>
-      <div className="main__middle-section" onWheel={drawingCanvasHandler}>
-        <DrawingCanvas />
+      <div className="main__middle-section" onWheel={changeDrawingCanvasScale} ref={middleSectionRef}>
+        <DrawingCanvas middleSectionRef={middleSectionRef}/>
       </div>
       <div className="main__right-section"></div>
     </main>
