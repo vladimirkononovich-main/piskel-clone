@@ -1,10 +1,10 @@
 import { off } from "process";
 import React, { useEffect, useRef, useState } from "react";
 import { windowPressedMouseButton } from "../../../App";
-import {  useAppSelector } from "../../../hooks";
+import { useAppSelector } from "../../../hooks";
 import { RootState } from "../../../store";
 import { drawingToolFunctions } from "../DrawingTools/tools";
-import {  IDrawingToolFunctions, IPixel } from "../models";
+import { IDrawingToolFunctions, IPixel } from "../models";
 
 let matrix: IPixel[][] | null = null;
 
@@ -13,7 +13,6 @@ function DrawingCanvas({
 }: {
   middleSectionRef: React.MutableRefObject<null>;
 }) {
-  let middleSection: HTMLDivElement;
   const drawingCanvasRef = useRef(null);
   const drawingTools = useAppSelector((state: RootState) => state.drawingTools);
   const drawingCanvas = useAppSelector(
@@ -26,23 +25,52 @@ function DrawingCanvas({
   let drawingCanvasHTML: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
 
+  let middleSection: HTMLDivElement;
+  let middleSectionWidth: number;
+  let middleSectionHeight: number;
+  let visibleWidth: number;
+  let visibleHeight: number;
+  let overflowY: number;
+  let overflowX: number;
+  let croppedRowHeight: number;
+  let croppedPixelWidth: number;
+  let pixelWidthRemainder: number;
+
+  const canvasWidthToScale = drawingCanvas.width * drawingCanvas.scale;
+  const canvasHeightToScale = drawingCanvas.height * drawingCanvas.scale;
+  const scale = drawingCanvas.scale;
+  const height = drawingCanvas.height;
+  const width = drawingCanvas.width;
+
   useEffect(() => {
     drawingCanvasHTML = drawingCanvasRef.current!;
     middleSection = middleSectionRef.current!;
+    middleSectionHeight = middleSection.clientHeight;
+    middleSectionWidth = middleSection.clientWidth;
+    visibleWidth = Math.min(canvasWidthToScale, middleSectionWidth);
+    visibleHeight = Math.min(canvasHeightToScale, middleSectionHeight);
+    overflowY = Math.floor((canvasHeightToScale - visibleHeight) / 2 / scale);
+    overflowX = Math.floor((canvasWidthToScale - visibleWidth) / 2 / scale);
+    croppedRowHeight = Math.floor(
+      (visibleHeight - (height - overflowY * 2 - 2) * scale) / 2
+    );
+    croppedPixelWidth = Math.floor(
+      (visibleWidth - (width - overflowX * 2 - 2) * scale) / 2
+    );
+    pixelWidthRemainder =
+      (visibleWidth - (width - overflowX * 2 - 2) * scale) % 2;
+
     ctx = drawingCanvasHTML.getContext("2d", { willReadFrequently: true })!;
     if (!matrix) initDrawingCanvasMatrix();
   });
 
   useEffect(() => {
-    const widthWithScale = drawingCanvas.width * drawingCanvas.scale;
-    const heightWithScale = drawingCanvas.height * drawingCanvas.scale;
-
     drawingCanvasHTML.width = Math.min(
-      widthWithScale,
+      canvasWidthToScale,
       middleSection.clientWidth
     );
     drawingCanvasHTML.height = Math.min(
-      heightWithScale,
+      canvasHeightToScale,
       middleSection.clientHeight
     );
 
@@ -66,30 +94,6 @@ function DrawingCanvas({
 
   const scaleDrawingCanvas = () => {
     if (!matrix) return;
-    const middleSectionWidth = middleSection.clientWidth;
-    const middleSectionHeight = middleSection.clientHeight;
-    const canvasWidthToScale = drawingCanvas.width * drawingCanvas.scale;
-    const canvasHeightToScale = drawingCanvas.height * drawingCanvas.scale;
-    const scale = drawingCanvas.scale;
-    const height = drawingCanvas.height;
-    const width = drawingCanvas.width;
-    const visibleWidth = Math.min(canvasWidthToScale, middleSectionWidth);
-    const visibleHeight = Math.min(canvasHeightToScale, middleSectionHeight);
-
-    const overflowY = Math.floor(
-      (canvasHeightToScale - visibleHeight) / 2 / scale
-    );
-    const overflowX = Math.floor(
-      (canvasWidthToScale - visibleWidth) / 2 / scale
-    );
-    const rowHeight = Math.floor(
-      (visibleHeight - (height - overflowY * 2 - 2) * scale) / 2
-    );
-    const pixelWidth = Math.floor(
-      (visibleWidth - (width - overflowX * 2 - 2) * scale) / 2
-    );
-    const pixelWidthRemainder =
-      (visibleWidth - (width - overflowX * 2 - 2) * scale) % 2;
 
     const imageData: ImageData | null = ctx.getImageData(
       0,
@@ -106,14 +110,15 @@ function DrawingCanvas({
 
     for (let rowI = matrixStart; rowI <= matrixEnd; rowI++) {
       let currRowHeight = scale;
-      if (rowI === matrixStart || rowI === matrixEnd) currRowHeight = rowHeight;
+      if (rowI === matrixStart || rowI === matrixEnd)
+        currRowHeight = croppedRowHeight;
 
       for (let i = 0; i < currRowHeight; i++) {
         for (let pxlI = rowStart; pxlI <= rowEnd; pxlI++) {
           const pixelAlpha = +matrix[rowI][pxlI].colorRGBA.alpha;
           let currPixelWidth = 4 * scale;
-          if (pxlI === rowStart) currPixelWidth = 4 * pixelWidth;
-          if (pxlI === rowEnd) currPixelWidth = 4 * pixelWidth;
+          if (pxlI === rowStart) currPixelWidth = 4 * croppedPixelWidth;
+          if (pxlI === rowEnd) currPixelWidth = 4 * croppedPixelWidth;
 
           for (let j = 1; j <= currPixelWidth; j++) {
             if (j % 4 === 0) imageData!.data[curr] = pixelAlpha;
@@ -130,8 +135,37 @@ function DrawingCanvas({
   const mouseDownHandler = (
     e: React.MouseEvent<HTMLCanvasElement, MouseEvent>
   ) => {
+    const xWithOverflow = Math.floor(
+      (e.nativeEvent.offsetX + (canvasWidthToScale - visibleWidth) / 2) / scale
+    );
+    const yWithOverflow = Math.floor(
+      (e.nativeEvent.offsetY + (canvasHeightToScale - visibleHeight) / 2) /
+        scale
+    );
+    const fillRectY = !(yWithOverflow - overflowY)
+      ? 0
+      : croppedRowHeight + (yWithOverflow - overflowY - 1) * scale;
+    const fillRectX = !(xWithOverflow - overflowX)
+      ? 0
+      : croppedPixelWidth + (xWithOverflow - overflowX - 1) * scale;
+    const fillRectHeight = !(yWithOverflow - overflowY)
+      ? croppedRowHeight
+      : scale;
+    const fillRectWidth = !(xWithOverflow - overflowX)
+      ? croppedPixelWidth
+      : scale;
+
+    const fillRectArgs = {
+      x: fillRectX,
+      y: fillRectY,
+      height: fillRectHeight,
+      width: fillRectWidth,
+    };
+
     const args = {
-      e,
+      xWithOverflow,
+      yWithOverflow,
+      fillRectArgs,
       matrix,
       scale: drawingCanvas.scale,
       rgba: drawingTools.colorRGBALeftClick,
