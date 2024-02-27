@@ -8,7 +8,6 @@ import DrawingTools from "./DrawingTools/DrawingTools";
 import "./main.css";
 import { IParentCoordinates } from "./models";
 
-
 const Main = () => {
   const drawingCanvas = useSelector((state: RootState) => state.drawingCanvas);
   const [coordinates, setCoordinates] = useState<IParentCoordinates | null>(
@@ -28,6 +27,25 @@ const Main = () => {
     middleSectionWidth = middleSection.clientWidth;
     middleSectionHeight = middleSection.clientHeight;
   });
+
+  // useEffect(() => {
+  //   calculateInitialScale();
+  // }, []);
+
+  // const calculateInitialScale = () => {
+  //   const w = drawingCanvas.width;
+  //   const h = drawingCanvas.height;
+  //   const w2 = middleSectionWidth;
+  //   const h2 = middleSectionHeight;
+
+  //   let dividend = w2 - w >= h2 - h ? w2 : h2;
+  //   let divisor = w2 - w >= h2 - h ? w : h;
+
+  //   const initScale = Math.floor(dividend / divisor);
+  //   console.log('initScale', initScale);
+    
+  //   dispatch(setScale(initScale));
+  // };
 
   const changeDrawingCanvasScale = (e: React.WheelEvent<HTMLDivElement>) => {
     const w = drawingCanvas.width;

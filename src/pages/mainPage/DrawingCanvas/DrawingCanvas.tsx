@@ -28,7 +28,7 @@ function DrawingCanvas({ parentRef, parentCoordinates }: IProps) {
     drawingToolFunctions[
       drawingTools.currentToolName as keyof IDrawingToolFunctions
     ];
-  const scale = drawingCanvas.scale;
+  let scale = drawingCanvas.scale;
   let drawingCanvasHTML: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
 
@@ -51,8 +51,8 @@ function DrawingCanvas({ parentRef, parentCoordinates }: IProps) {
     left: 0,
   };
 
-  const widthToScale = drawingCanvas.width * drawingCanvas.scale;
-  const heightToScale = drawingCanvas.height * drawingCanvas.scale;
+  let widthToScale = drawingCanvas.width * drawingCanvas.scale;
+  let heightToScale = drawingCanvas.height * drawingCanvas.scale;
   const height = drawingCanvas.height;
   const width = drawingCanvas.width;
 
@@ -95,6 +95,7 @@ function DrawingCanvas({ parentRef, parentCoordinates }: IProps) {
 
   const updateCanvas = () => {
     if (!matrix) return;
+    if (!visibleHeight || !visibleWidth) return;
 
     const xStart = Math.floor(Math.abs(overflow.left) / scale);
     const xEnd = width - 1 - Math.floor(overflow.right / scale);
@@ -134,7 +135,33 @@ function DrawingCanvas({ parentRef, parentCoordinates }: IProps) {
     ctx.putImageData(imageData, 0, 0);
   };
 
+  const calculateInitialScale = () => {
+    const w = drawingCanvas.width;
+    const h = drawingCanvas.height;
+    const w2 = parentWidth;
+    const h2 = parentHeight;
+    const minScale = 1;
+    const maxScale = 100;
+
+    let dividend = w2 - w <= h2 - h ? w2 : h2;
+    let divisor = w2 - w <= h2 - h ? w : h;
+    let initScale = Math.floor(dividend / divisor);
+
+    if (initScale < minScale) initScale = minScale;
+    if (initScale > maxScale) initScale = maxScale;
+
+    dispatch(setScale(initScale));
+
+    return initScale;
+  };
+
   const centerTheCanvas = () => {
+    scale = calculateInitialScale();
+    widthToScale = drawingCanvas.width * scale;
+    heightToScale = drawingCanvas.height * scale;
+    visibleWidth = Math.min(widthToScale, parentWidth);
+    visibleHeight = Math.min(heightToScale, parentHeight);
+
     drawingCanvasHTML.width = visibleWidth;
     drawingCanvasHTML.height = visibleHeight;
 
@@ -192,7 +219,6 @@ function DrawingCanvas({ parentRef, parentCoordinates }: IProps) {
 
       xOutside = Math.max(left, 0) + x;
       yOutside = Math.max(top, 0) + y;
-
       xIndex = Math.floor((left < 0 ? Math.abs(left) + x : x) / prevScale);
       yIndex = Math.floor((top < 0 ? Math.abs(top) + y : y) / prevScale);
     }
@@ -257,48 +283,21 @@ function DrawingCanvas({ parentRef, parentCoordinates }: IProps) {
   const mouseDownHandler = (
     e: React.MouseEvent<HTMLCanvasElement, MouseEvent>
   ) => {
-    // ........................................................
-    const xWithOverflow = Math.floor(
-      (e.nativeEvent.offsetX + (widthToScale - visibleWidth) / 2) / scale
-    );
-    const yWithOverflow = Math.floor(
-      (e.nativeEvent.offsetY + (heightToScale - visibleHeight) / 2) / scale
-    );
-
     const offsetX = e.nativeEvent.offsetX;
     const offsetY = e.nativeEvent.offsetY;
-
     const xIndex = Math.floor(
       ((left < 0 ? Math.abs(left) : 0) + offsetX) / scale
     );
     const yIndex = Math.floor(
       ((top < 0 ? Math.abs(top) : 0) + offsetY) / scale
     );
-    console.log(xIndex, "xIndex", yIndex, 'yIndex');
-
-    // const fillRectY = !(yWithOverflow - overflowY)
-    //   ? 0
-    //   : croppedRowHeight + (yWithOverflow - overflowY - 1) * scale;
-    // const fillRectX = !(xWithOverflow - overflowX)
-    //   ? 0
-    //   : croppedPixelWidth + (xWithOverflow - overflowX - 1) * scale;
-    // const fillRectHeight = !(yWithOverflow - overflowY)
-    //   ? croppedRowHeight
-    //   : scale;
-    // const fillRectWidth = !(xWithOverflow - overflowX)
-    //   ? croppedPixelWidth
-    //   : scale;
+    const fillRectX = Math.min(0, left) + xIndex * scale;
+    const fillRectY = Math.min(0, top) + yIndex * scale;
 
     const fillRectArgs = {
-      // x: fillRectX,
-      // y: fillRectY,
-      // height: fillRectHeight,
-      // width: fillRectWidth,
-
-      x: 0,
-      y: 0,
-      height: 0,
-      width: 0,
+      x: fillRectX,
+      y: fillRectY,
+      clickRGBA: drawingTools.colorRGBALeftClick,
     };
 
     const args = {
@@ -307,13 +306,10 @@ function DrawingCanvas({ parentRef, parentCoordinates }: IProps) {
       fillRectArgs,
       matrix,
       scale: drawingCanvas.scale,
-      rgba: drawingTools.colorRGBALeftClick,
       ctx,
     };
     currentTool(args);
   };
-  // const [scalingEvent, setScalingEvent] =
-  //   useState<React.WheelEvent<HTMLCanvasElement> | null>(null);
 
   const onWheelHandler = (e: React.WheelEvent<HTMLCanvasElement>) => {
     e.stopPropagation();

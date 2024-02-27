@@ -2,8 +2,8 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { DrawingCanvasMatrix, IDrawingCanvas, IPixel } from "../models";
 
 const initialState: IDrawingCanvas = {
-  width: 50,
-  height: 50,
+  width: 1,
+  height: 1,
   scale: 1,
   matrix: null,
 };

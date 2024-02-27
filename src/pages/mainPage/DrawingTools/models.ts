@@ -6,11 +6,9 @@ export interface IPenToolParams {
   fillRectArgs: {
     x: number;
     y: number;
-    height: number;
-    width: number;
+    clickRGBA: IRGBA;
   };
   matrix: IPixel[][] | null;
   scale: number;
-  rgba: IRGBA;
   ctx: CanvasRenderingContext2D;
 }

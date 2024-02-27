@@ -1,16 +1,14 @@
-import { IPixel } from "../models";
 import { IPenToolParams } from "./models";
 
 export const penTool = ({
   matrix,
-  rgba,
   ctx,
   fillRectArgs,
   xIndex,
   yIndex,
+  scale,
 }: IPenToolParams) => {
   if (!matrix) return;
-  console.log(fillRectArgs);
 
   if (
     yIndex >= matrix.length ||
@@ -20,13 +18,9 @@ export const penTool = ({
   )
     return;
 
+  const rgba = fillRectArgs.clickRGBA;
   ctx.fillStyle = `rgba(${rgba.red},${rgba.green},${rgba.blue},${rgba.alpha})`;
-  ctx.fillRect(
-    fillRectArgs.x,
-    fillRectArgs.y,
-    fillRectArgs.width,
-    fillRectArgs.height
-  );
+  ctx.fillRect(fillRectArgs.x, fillRectArgs.y, scale, scale);
 
   matrix[yIndex][xIndex].colorRGBA = rgba;
 };
