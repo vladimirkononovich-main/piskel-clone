@@ -27,3 +27,9 @@ export interface IDrawingTools {
 export interface IDrawingToolFunctions {
   penTool: (matrix: DrawingCanvasMatrix) => DrawingCanvasMatrix;
 }
+
+export interface IParentCoordinates {
+  x: number;
+  y: number;
+  prevScale: number;
+}

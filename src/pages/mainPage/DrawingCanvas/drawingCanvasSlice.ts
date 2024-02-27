@@ -2,8 +2,8 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { DrawingCanvasMatrix, IDrawingCanvas, IPixel } from "../models";
 
 const initialState: IDrawingCanvas = {
-  width: 30,
-  height: 30,
+  width: 50,
+  height: 50,
   scale: 1,
   matrix: null,
 };
@@ -19,8 +19,14 @@ export const drawingCanvasSlice = createSlice({
     setScale: (state, action: PayloadAction<number>) => {
       const minScale = 1;
       const maxScale = 100;
-      if (action.payload > maxScale) return state;
-      if (action.payload < minScale) return state;
+      if (action.payload > maxScale) {
+        state.scale = maxScale;
+        return state;
+      }
+      if (action.payload < minScale) {
+        state.scale = minScale;
+        return state;
+      }
 
       state.scale = action.payload;
     },

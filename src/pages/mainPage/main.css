@@ -83,22 +83,31 @@
 .main__color-selection-right-click {
 }
 .main__middle-section {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #999;
   flex-basis: 1430px;
   max-width: 1430px;
-  overflow: hidden;
+  background-color: #999;
 }
 .main__right-section {
+  position: relative;
+  box-sizing: border-box;
   flex-basis: 265px;
+  padding-left: 10px;
+  padding-bottom: 20px;
+}
+.main__drawing-canvas-info {
+  position: absolute;
+  bottom: 40px;
+  color: gold;
+  font-size: 12px;
+  font-weight: bold;
+  font-family: monospace;
 }
 .main__drawing-canvas {
   position: relative;
   z-index: 0;
   background: url(../../assets/canvas-background-img.png);
   background-position: center;
+  background-attachment: fixed;
 }
 .main__canvas-wrapper {
   display: flex;

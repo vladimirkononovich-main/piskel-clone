@@ -1,21 +1,22 @@
 import { IPixel } from "../models";
-import { IPenToolParams } from "./drawingToolsModels";
+import { IPenToolParams } from "./models";
 
 export const penTool = ({
   matrix,
   rgba,
   ctx,
   fillRectArgs,
-  xWithOverflow,
-  yWithOverflow,
+  xIndex,
+  yIndex,
 }: IPenToolParams) => {
   if (!matrix) return;
+  console.log(fillRectArgs);
 
   if (
-    yWithOverflow >= matrix.length ||
-    xWithOverflow >= matrix[0].length ||
-    yWithOverflow < 0 ||
-    xWithOverflow < 0
+    yIndex >= matrix.length ||
+    xIndex >= matrix[0].length ||
+    yIndex < 0 ||
+    xIndex < 0
   )
     return;
 
@@ -27,7 +28,7 @@ export const penTool = ({
     fillRectArgs.height
   );
 
-  matrix[yWithOverflow][xWithOverflow].colorRGBA = rgba;
+  matrix[yIndex][xIndex].colorRGBA = rgba;
 };
 
 export const drawingToolFunctions = { penTool };

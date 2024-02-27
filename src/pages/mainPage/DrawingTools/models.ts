@@ -1,8 +1,8 @@
 import { DrawingCanvasMatrix, IPixel, IRGBA } from "../models";
 
 export interface IPenToolParams {
-  xWithOverflow: number;
-  yWithOverflow: number;
+  xIndex: number;
+  yIndex: number;
   fillRectArgs: {
     x: number;
     y: number;
