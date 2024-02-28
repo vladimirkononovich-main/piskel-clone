@@ -1,21 +1,16 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { DrawingCanvasMatrix, IDrawingCanvas, IPixel } from "../models";
+import { DrawingCanvasMatrix, IDrawingCanvas, Pixel } from "../models";
 
 const initialState: IDrawingCanvas = {
-  width: 1,
-  height: 1,
+  width: 50,
+  height: 50,
   scale: 1,
-  matrix: null,
 };
 
 export const drawingCanvasSlice = createSlice({
   name: "drawingCanvas",
   initialState,
   reducers: {
-    setMatrix: (state, action: PayloadAction<DrawingCanvasMatrix>) => {
-      state.matrix = action.payload;
-    },
-
     setScale: (state, action: PayloadAction<number>) => {
       const minScale = 1;
       const maxScale = 100;
@@ -33,6 +28,6 @@ export const drawingCanvasSlice = createSlice({
   },
 });
 
-export const { setMatrix, setScale } = drawingCanvasSlice.actions;
+export const { setScale } = drawingCanvasSlice.actions;
 
 export default drawingCanvasSlice.reducer;

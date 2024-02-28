@@ -1,4 +1,4 @@
-import { DrawingCanvasMatrix, IPixel, IRGBA } from "../models";
+import { DrawingCanvasMatrix, Pixel, IRGBA } from "../models";
 
 export interface IPenToolParams {
   xIndex: number;
@@ -8,7 +8,7 @@ export interface IPenToolParams {
     y: number;
     clickRGBA: IRGBA;
   };
-  matrix: IPixel[][] | null;
+  matrix: Pixel[][] | null;
   scale: number;
   ctx: CanvasRenderingContext2D;
 }

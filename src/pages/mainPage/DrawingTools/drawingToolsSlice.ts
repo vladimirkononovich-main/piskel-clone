@@ -1,22 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { DrawingCanvasMatrix, IDrawingTools, IPixel } from "../models";
+import { DrawingCanvasMatrix, IDrawingTools } from "../models";
 
 const initialState: IDrawingTools = {
   penSize: 1,
   penSizes: [1, 2, 3, 4],
   currentToolName: "penTool",
-  colorRGBALeftClick: {
-    red: "0",
-    green: "0",
-    blue: "0",
-    alpha: "255",
-  },
-  colorRGBARightClick: {
-    red: "0",
-    green: "0",
-    blue: "0",
-    alpha: "1",
-  },
+  colorRGBALeftClick: [0, 0, 0, 255],
+  colorRGBARightClick: [0, 0, 0, 255],
 };
 
 export const drawingToolsSlice = createSlice({

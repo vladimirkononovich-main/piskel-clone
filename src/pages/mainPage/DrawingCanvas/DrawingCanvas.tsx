@@ -4,11 +4,11 @@ import { windowPressedMouseButton } from "../../../App";
 import { useAppDispatch, useAppSelector } from "../../../hooks";
 import { RootState } from "../../../store";
 import { drawingToolFunctions } from "../DrawingTools/tools";
-import { IDrawingToolFunctions, IPixel } from "../models";
+import { IDrawingToolFunctions, Pixel } from "../models";
 import { setScale } from "./drawingCanvasSlice";
 import { IProps, IScalingParams } from "./models";
 
-let matrix: IPixel[][] | null = null;
+let matrix: Pixel[][] | null = null;
 let top: number;
 let right: number;
 let bottom: number;
@@ -81,14 +81,16 @@ function DrawingCanvas({ parentRef, parentCoordinates }: IProps) {
   const initDrawingCanvasMatrix = () => {
     matrix = Array.from(Array(drawingCanvas.height), () => {
       return Array.from(Array(drawingCanvas.width), () => {
-        return {
-          colorRGBA: {
-            red: "0",
-            green: "0",
-            blue: "0",
-            alpha: "0",
-          },
-        };
+        // return {
+        //   colorRGBA: {
+        //     red: "0",
+        //     green: "0",
+        //     blue: "0",
+        //     alpha: "0",
+        //   },
+        // };
+
+        return [0, 0, 0, 0];
       });
     });
   };
@@ -125,7 +127,7 @@ function DrawingCanvas({ parentRef, parentCoordinates }: IProps) {
 
           for (let w = 1; w <= width; w++) {
             if (w % 4 === 0)
-              imageData.data[curr] = +matrix[y][x].colorRGBA.alpha;
+              imageData.data[curr] = +matrix[y][x][3];
             curr += 1;
           }
         }

@@ -1,19 +1,15 @@
-export interface IRGBA {
-  red: string;
-  green: string;
-  blue: string;
-  alpha: string;
-}
-export interface IPixel {
-  colorRGBA: IRGBA;
-}
-export type DrawingCanvasMatrix = IPixel[];
+export type IRGBA = number[]
+// export interface IPixel {
+//   colorRGBA: IRGBA;
+// }
+export type Pixel = number[]
+export type DrawingCanvasMatrix = Pixel[];
 
 export interface IDrawingCanvas {
   width: number;
   height: number;
   scale: number;
-  matrix: DrawingCanvasMatrix | null;
+  // matrix: DrawingCanvasMatrix | null;
 }
 
 export interface IDrawingTools {

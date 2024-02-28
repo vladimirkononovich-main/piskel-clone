@@ -19,10 +19,10 @@ export const penTool = ({
     return;
 
   const rgba = fillRectArgs.clickRGBA;
-  ctx.fillStyle = `rgba(${rgba.red},${rgba.green},${rgba.blue},${rgba.alpha})`;
+  ctx.fillStyle = `rgba(${rgba[0]},${rgba[1]},${rgba[2]},${rgba[3]})`;
   ctx.fillRect(fillRectArgs.x, fillRectArgs.y, scale, scale);
 
-  matrix[yIndex][xIndex].colorRGBA = rgba;
+  matrix[yIndex][xIndex] = rgba;
 };
 
 export const drawingToolFunctions = { penTool };
