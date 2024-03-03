@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { DrawingCanvasMatrix, IDrawingCanvas, Pixel } from "../models";
+import { IDrawingCanvasInitState } from "./models";
 
-const initialState: IDrawingCanvas = {
+const initialState: IDrawingCanvasInitState = {
   width: 50,
   height: 50,
   scale: 1,
