@@ -5,11 +5,8 @@ export const getFillRectXY = <T extends number>(
   yIndex: T,
   scale: T
 ) => {
-  const fillRectX = Math.min(0, left) + xIndex * scale;
-  const fillRectY = Math.min(0, top) + yIndex * scale;
-
   return {
-    x: fillRectX,
-    y: fillRectY,
+    x: Math.min(0, left) + xIndex * scale,
+    y: Math.min(0, top) + yIndex * scale,
   };
 };

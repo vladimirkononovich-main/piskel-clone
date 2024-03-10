@@ -4,6 +4,13 @@ import { connectTwoPixels } from "./pixelConnector";
 
 export const penTool = (params: ICurrentToolParams) => {
   if (!params.matrix) return;
+  const prevPixel = params.firstPixelPos;
+
+  if (params.e.type === "pointerup") {
+    prevPixel.xIndex = null;
+    prevPixel.yIndex = null;
+    return;
+  }
 
   const ctx = params.ctx;
   const fillRectArgs = params.fillRectArgs;
@@ -14,7 +21,6 @@ export const penTool = (params: ICurrentToolParams) => {
   const matrix = params.matrix;
   const width = params.width;
   const height = params.height;
-  const prevPixel = params.prevPixelIndexes;
 
   if (prevPixel.xIndex !== null && prevPixel.yIndex !== null) {
     const way = connectTwoPixels(params);

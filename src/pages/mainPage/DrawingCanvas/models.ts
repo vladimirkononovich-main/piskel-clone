@@ -1,10 +1,5 @@
 import { IRGBA, Pixel } from "../models";
 
-export interface IWheelPos {
-  offSetX: number;
-  offSetY: number;
-}
-
 export interface IScalingParams {
   event: React.WheelEvent<HTMLCanvasElement> | null;
   prevScale: number | null;
@@ -19,10 +14,10 @@ export type GetFillRectXY = (
   y: number;
 };
 
-export type PixelIndexes = {
+export type PixelPosition = {
   xIndex: number | null;
   yIndex: number | null;
-};
+}
 
 export interface IFillRectArgs {
   x: number;
@@ -31,6 +26,7 @@ export interface IFillRectArgs {
 }
 
 export interface ICurrentToolParams {
+  e: React.PointerEvent<HTMLCanvasElement>;
   xIndex: number;
   yIndex: number;
   fillRectArgs: IFillRectArgs;
@@ -39,7 +35,7 @@ export interface ICurrentToolParams {
   ctx: CanvasRenderingContext2D;
   width: number;
   height: number;
-  prevPixelIndexes: PixelIndexes;
+  firstPixelPos: PixelPosition;
 }
 
 export interface IDrawingCanvasProps {

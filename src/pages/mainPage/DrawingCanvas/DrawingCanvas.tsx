@@ -2,15 +2,16 @@ import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../hooks";
 import { RootState } from "../../../store";
 import { drawingToolFunctions } from "../DrawingTools/tools";
+import { IRGBA } from "../models";
 import { setScale } from "./drawingCanvasSlice";
 import {
   IDrawingCanvasProps,
   IScalingParams,
   DrawingCanvasMatrix,
   IDrawingToolFunctions,
-  PixelIndexes,
   ICurrentToolParams,
   IFillRectArgs,
+  PixelPosition,
 } from "./models";
 import { getFillRectXY } from "./prefillingTheRectangle";
 
@@ -19,7 +20,9 @@ export let top: number;
 export let left: number;
 export let right: number;
 export let bottom: number;
-export let prevPixelIndexes: PixelIndexes = {
+export let scale: number;
+
+export let firstPixelPos: PixelPosition = {
   xIndex: null,
   yIndex: null,
 };
@@ -43,7 +46,7 @@ const DrawingCanvas = React.forwardRef(
       drawingToolFunctions[
         drawingTools.currentToolName as keyof IDrawingToolFunctions
       ];
-    let scale = drawingCanvas.scale;
+    scale = drawingCanvas.scale;
     let drawingCanvasHTML: HTMLCanvasElement;
     let ctx: CanvasRenderingContext2D;
 
@@ -295,15 +298,8 @@ const DrawingCanvas = React.forwardRef(
       setScalingParams(null);
     };
 
-    const mouseHandler = (
-      e: React.MouseEvent<HTMLCanvasElement, MouseEvent>
-    ) => {
-      e.stopPropagation();
-      let currClick: string;
-
-      if (e.buttons === 0) return;
-      if (e.buttons === 1) currClick = "left";
-      if (e.buttons === 2) currClick = "right";
+    const pointerHandler = (e: React.PointerEvent<HTMLCanvasElement>) => {
+      if (e.buttons === 0 && e.type !== "pointerup") return;
 
       const offsetX = e.nativeEvent.offsetX;
       const offsetY = e.nativeEvent.offsetY;
@@ -313,18 +309,21 @@ const DrawingCanvas = React.forwardRef(
       const yIndex = Math.floor(
         ((top < 0 ? Math.abs(top) : 0) + offsetY) / scale
       );
+      let rgba: IRGBA;
 
-      const rgba =
-        currClick! === "left"
-          ? drawingTools.colorRGBALeftClick
-          : drawingTools.colorRGBARightClick;
+      if (e.buttons === 1 || e.button === 0)
+        rgba = drawingTools.colorRGBALeftClick;
+      if (e.buttons === 2 || e.button === 2)
+        rgba = drawingTools.colorRGBARightClick;
+      if (!rgba!) return;
 
       const fillRectArgs: IFillRectArgs = {
         ...getFillRectXY(xIndex, yIndex, scale),
-        clickRGBA: rgba,
+        clickRGBA: rgba!,
       };
 
       const args: ICurrentToolParams = {
+        e,
         xIndex,
         yIndex,
         fillRectArgs,
@@ -333,11 +332,9 @@ const DrawingCanvas = React.forwardRef(
         ctx,
         width,
         height,
-        prevPixelIndexes,
+        firstPixelPos,
       };
 
-      if (yIndex >= height || xIndex >= width || yIndex < 0 || xIndex < 0)
-        return;
       currentTool(args);
     };
 
@@ -350,7 +347,7 @@ const DrawingCanvas = React.forwardRef(
       const w2 = parentWidth;
       const h2 = parentHeight;
 
-      if(!w || !h || !w2 || !h2) return
+      if (!w || !h || !w2 || !h2) return;
 
       const maxScale = 100;
       const minScale = 1;
@@ -371,8 +368,9 @@ const DrawingCanvas = React.forwardRef(
     return (
       <canvas
         onWheel={onWheelHandler}
-        onMouseMove={mouseHandler}
-        onMouseDown={mouseHandler}
+        onPointerMove={pointerHandler}
+        onPointerDown={pointerHandler}
+        onPointerUp={pointerHandler}
         onContextMenu={(e) => e.preventDefault()}
         className="main__drawing-canvas"
         ref={drawingCanvasRef}

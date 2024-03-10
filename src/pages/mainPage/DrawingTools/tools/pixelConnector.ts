@@ -1,11 +1,11 @@
-import { ICurrentToolParams, PixelIndexes } from "../../DrawingCanvas/models";
+import { ICurrentToolParams, PixelPosition } from "../../DrawingCanvas/models";
 
 export const connectTwoPixels = (params: ICurrentToolParams) => {
   const endX = params.xIndex;
   const endY = params.yIndex;
 
-  let y = params.prevPixelIndexes.yIndex!;
-  let x = params.prevPixelIndexes.xIndex!;
+  let y = params.firstPixelPos.yIndex!;
+  let x = params.firstPixelPos.xIndex!;
 
   const yInterval = endY > y ? endY - y + 1 : y - endY + 1 || 1;
   const xInterval = endX > x ? endX - x + 1 : x - endX + 1;
@@ -77,12 +77,12 @@ export const connectTwoPixels = (params: ICurrentToolParams) => {
     });
   }
 
-  const indexesForFilling: PixelIndexes[] = [];
+  const pixelsForFilling: PixelPosition[] = [];
 
   connectionWay.forEach((currInterval) => {
     currInterval.forEach((column) => {
       column.forEach(() => {
-        indexesForFilling.push({ xIndex: x, yIndex: y });
+        pixelsForFilling.push({ xIndex: x, yIndex: y });
         if (yInterval >= xInterval) y += yDirection;
         else x += xDirection;
       });
@@ -92,5 +92,5 @@ export const connectTwoPixels = (params: ICurrentToolParams) => {
     });
   });
 
-  return indexesForFilling;
+  return pixelsForFilling;
 };

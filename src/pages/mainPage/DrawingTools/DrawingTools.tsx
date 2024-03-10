@@ -3,13 +3,17 @@ import React from "react";
 import { useAppDispatch, useAppSelector } from "../../../hooks";
 import { RootState } from "../../../store";
 import { setCurrentToolName, setPenSize } from "./drawingToolsSlice";
+import "./drawingTools.css";
 
 function DrawingTools() {
   const { penSizes, penSize, currentToolName } = useAppSelector(
     (state: RootState) => state.drawingTools
   );
   const dispatch = useAppDispatch();
-  const tools = [{ className: "pen-tool", toolFuncName: "penTool" }];
+  const tools = [
+    { className: "pen-tool", toolFuncName: "penTool" },
+    { className: "stroke-tool", toolFuncName: "strokeTool" },
+  ];
 
   return (
     <div className="main__drawing-tools">
@@ -38,8 +42,14 @@ function DrawingTools() {
           ></div>
         );
       })}
-      <input type="color" className="main__color-selection main__color-selection-left"/>
-      <input type="color" className="main__color-selection main__color-selection-right"/>
+      <input
+        type="color"
+        className="main__color-selection main__color-selection-left"
+      />
+      <input
+        type="color"
+        className="main__color-selection main__color-selection-right"
+      />
     </div>
   );
 }

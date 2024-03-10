@@ -23,7 +23,7 @@ body,
   flex-direction: column;
 }
 body * {
-  outline: 1px solid red;
+  /* outline: 1px solid red; */
 }
 * {
   user-select: none;

@@ -1,21 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks";
 import { RootState } from "../../store";
-import DrawingCanvas, {
-  left,
-  top,
-  matrix,
-  prevPixelIndexes,
-} from "./DrawingCanvas/DrawingCanvas";
+import DrawingCanvas from "./DrawingCanvas/DrawingCanvas";
 import { setScale } from "./DrawingCanvas/drawingCanvasSlice";
-import {
-  ICurrentToolParams,
-  IDrawingToolFunctions,
-  IFillRectArgs,
-} from "./DrawingCanvas/models";
-import { getFillRectXY } from "./DrawingCanvas/prefillingTheRectangle";
 import DrawingTools from "./DrawingTools/DrawingTools";
-import { drawingToolFunctions } from "./DrawingTools/tools";
 import "./main.css";
 import { IParentCoordinates } from "./models";
 
@@ -23,14 +11,9 @@ const Main = () => {
   const drawingCanvas = useAppSelector(
     (state: RootState) => state.drawingCanvas
   );
-  const drawingTools = useAppSelector((state: RootState) => state.drawingTools);
   const [coordinates, setCoordinates] = useState<IParentCoordinates | null>(
     null
   );
-  const currentTool =
-    drawingToolFunctions[
-      drawingTools.currentToolName as keyof IDrawingToolFunctions
-    ];
   const dispatch = useAppDispatch();
   const middleSectionRef = useRef(null);
   const drawingCanvasRef = useRef(null);
@@ -80,46 +63,23 @@ const Main = () => {
     });
   };
 
-  const mouseEvent = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+  const pointerHandler = (e: React.PointerEvent<HTMLDivElement>) => {
     if (!drawingCanvasHTML) return;
 
-    const x = e.nativeEvent.offsetX;
-    const y = e.nativeEvent.offsetY;
-    const width = drawingCanvas.width;
-    const height = drawingCanvas.height;
-    const ctx = drawingCanvasHTML.getContext("2d")!;
+    switch (e.type) {
+      case "pointermove":
+        if (!drawingCanvasHTML.hasPointerCapture(e.pointerId))
+          drawingCanvasHTML.setPointerCapture(e.pointerId);
+        return;
 
-    let yIndex = Math.floor((y - top) / scale);
-    let xIndex = Math.floor((x - left) / scale);
-    let currClick: string;
+      case "pointerdown":
+        drawingCanvasHTML.setPointerCapture(e.pointerId);
+        return;
 
-    if (e.buttons === 0) return;
-    if (e.buttons === 1) currClick = "left";
-    if (e.buttons === 2) currClick = "right";
-
-    const rgba =
-      currClick! === "left"
-        ? drawingTools.colorRGBALeftClick
-        : drawingTools.colorRGBARightClick;
-
-    const fillRectArgs: IFillRectArgs = {
-      ...getFillRectXY(xIndex, yIndex, scale),
-      clickRGBA: rgba,
-    };
-
-    const arg: ICurrentToolParams = {
-      ctx,
-      fillRectArgs,
-      matrix,
-      scale,
-      xIndex,
-      yIndex,
-      width,
-      height,
-      prevPixelIndexes,
-    };
-
-    currentTool(arg);
+      // case "pointerup":
+      //   drawingCanvasHTML.releasePointerCapture(e.pointerId);
+      //   return;
+    }
   };
 
   return (
@@ -129,7 +89,9 @@ const Main = () => {
       </div>
       <div
         className="main__middle-section"
-        onMouseMove={mouseEvent}
+        onPointerMove={pointerHandler}
+        onPointerDown={pointerHandler}
+        // onPointerUp={pointerHandler}
         onWheel={(e) => changeDrawingCanvasScale(e)}
         ref={middleSectionRef}
       >
