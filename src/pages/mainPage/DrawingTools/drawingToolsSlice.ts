@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { DrawingCanvasMatrix, IDrawingTools } from "../models";
+import { IDrawingTools } from "../models";
 
 const initialState: IDrawingTools = {
   penSize: 1,

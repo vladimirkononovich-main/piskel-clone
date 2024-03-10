@@ -75,10 +75,6 @@ const Main = () => {
       case "pointerdown":
         drawingCanvasHTML.setPointerCapture(e.pointerId);
         return;
-
-      // case "pointerup":
-      //   drawingCanvasHTML.releasePointerCapture(e.pointerId);
-      //   return;
     }
   };
 
