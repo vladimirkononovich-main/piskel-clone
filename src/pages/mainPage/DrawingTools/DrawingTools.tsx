@@ -42,14 +42,6 @@ function DrawingTools() {
           ></div>
         );
       })}
-      <input
-        type="color"
-        className="main__color-selection main__color-selection-left"
-      />
-      <input
-        type="color"
-        className="main__color-selection main__color-selection-right"
-      />
     </div>
   );
 }

@@ -1,0 +1,116 @@
+.sketch-picker {
+  position: absolute;
+  display: flex;
+  width: 237px;
+  height: 197px;
+  left: 100px;
+  bottom: 20px;
+  border-radius: 4px;
+  background-color: #2b2b2b;
+  border: solid 4px #888;
+  padding: 5px 5px 0 5px;
+  box-shadow: 0 0 5px 0 black;
+  box-sizing: border-box;
+  z-index: 1;
+}
+.palette-hue-wrapper {
+  padding: 5px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  flex-basis: 182px;
+  height: fit-content;
+}
+.preset-colors {
+  width: 41px;
+  padding: 5px 5px 0 5px;
+}
+.preset-colors__color {
+  width: 24px;
+  height: 24px;
+  border: solid 1px #d0d0d0;
+  border-color: #444;
+  margin: 0 4px 4px 0;
+  cursor: pointer;
+}
+.preset-colors__color_selected {
+  border-color: gold;
+  box-shadow: 0 0 0px 1px gold;
+}
+.palette {
+  position: relative;
+  width: 136px;
+  height: 136px;
+  margin-right: 8px;
+  background: linear-gradient(
+      to top,
+      rgba(0, 0, 0, 1) 0%,
+      rgba(255, 255, 255, 0) 100%
+    ),
+    linear-gradient(
+      to right,
+      rgba(255, 255, 255, 1) 0%,
+      rgba(255, 255, 255, 0) 70%
+    );
+  opacity: 0.9;
+}
+.palette-btn {
+  display: flex;
+  position: absolute;
+  border-radius: 8px;
+  outline: none;
+  padding: 0;
+  cursor: pointer;
+  margin: 0;
+  height: 12px;
+  width: 12px;
+  border: 2px solid white;
+  background: none;
+  box-sizing: border-box;
+  box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.5),
+    inset 0 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+.hue-slider {
+  position: relative;
+  width: 28px;
+  height: 136px;
+  background: linear-gradient(
+    to bottom,
+    #ff0000 0%,
+    #ffff00 17%,
+    #00ff00 33%,
+    #00ffff 50%,
+    #0000ff 67%,
+    #ff00ff 83%,
+    #ff0000 100%
+  );
+}
+.hue-slider__btn {
+  position: absolute;
+  cursor: pointer;
+  outline: none;
+  height: 9px;
+  left: -2px;
+  right: -2px;
+  border: 2px solid white;
+  background: rgba(255, 255, 255, 0);
+  opacity: 1;
+  border-radius: 2px;
+  box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.5),
+    inset 0 0 1px 1px rgba(0, 0, 0, 0.5);
+}
+.color-input {
+  height: 24px;
+  width: 172px;
+  box-sizing: border-box;
+  border: 1px solid #666;
+  margin: 0;
+  background: #111;
+  border-radius: 2px;
+  color: #d3d3d3;
+  font-family: monospace !important;
+  outline: none;
+  font-size: 12px;
+  padding: 4px 5px;
+  margin-top: 8px;
+}

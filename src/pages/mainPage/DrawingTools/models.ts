@@ -1,5 +1,13 @@
 import { Pixel, IRGBA } from "../models";
 
+export interface IDrawingToolsState {
+  penSize: number;
+  penSizes: number[];
+  currentToolName: string;
+  colorRGBALeftClick: IRGBA;
+  colorRGBARightClick: IRGBA;
+}
+
 export interface IFillRectArgs {
   x: number;
   y: number;
@@ -16,3 +24,4 @@ export interface IPenToolParams {
   width: number;
   height: number;
 }
+

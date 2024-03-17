@@ -1,0 +1,47 @@
+.color-picker {
+  display: flex;
+  position: relative;
+  margin-top: 10px;
+  margin-left: 10px;
+  width: 75px;
+  height: 75px;
+  
+}
+.color-picker__mouse-left,
+.color-picker__mouse-right,
+.color-picker__swaper {
+  position: absolute;
+  height: 46px;
+  width: 46px;
+  border: 4px solid #444;
+  outline: none;
+  cursor: pointer;
+}
+
+.color-picker__mouse-left:hover,
+.color-picker__mouse-right:hover {
+  border: 4px solid rgb(138, 135, 135);
+}
+
+.color-picker__mouse-left {
+  background-color: #000000;
+  z-index: 1;
+}
+.color-picker__mouse-right {
+  top: 25px;
+  left: 20px;
+}
+.color-picker__swaper {
+  background-color: transparent;
+  filter: brightness(35%);
+  background-image: url(../../../assets/icons.png);
+  background-position: -274px -222px;
+  width: 18px;
+  height: 18px;
+  border: none;
+  top: 50px;
+}
+.color-picker__swaper:hover {
+  filter: brightness(100%);
+}
+

@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks";
 import { RootState } from "../../store";
+import { ColorPicker } from "./ColorPicker/ColorPicker";
 import DrawingCanvas from "./DrawingCanvas/DrawingCanvas";
 import { setScale } from "./DrawingCanvas/drawingCanvasSlice";
 import DrawingTools from "./DrawingTools/DrawingTools";
@@ -82,6 +83,7 @@ const Main = () => {
     <main className="main">
       <div className="main__left-section">
         <DrawingTools />
+        <ColorPicker />
       </div>
       <div
         className="main__middle-section"
