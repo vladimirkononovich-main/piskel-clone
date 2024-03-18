@@ -1,4 +1,7 @@
-import {  Pixel, RGBA } from "../models";
+import { ActionCreatorWithPayload } from "@reduxjs/toolkit";
+import { AppDispatch } from "../../../store";
+import { ColorParams } from "../ColorPicker/models";
+import { Pixel, RGBA } from "../models";
 
 export interface IScalingParams {
   event: React.WheelEvent<HTMLCanvasElement> | null;
@@ -17,13 +20,18 @@ export type GetFillRectXY = (
 export type PixelPosition = {
   xIndex: number | null;
   yIndex: number | null;
-}
+};
 
 export interface IFillRectArgs {
   x: number;
   y: number;
   clickRGBA: RGBA;
 }
+
+export type ActionColorParams = ActionCreatorWithPayload<
+  ColorParams,
+  "colorPicker/setLeftColorParams" | "colorPicker/setRightColorParams"
+>;
 
 export interface ICurrentToolParams {
   e: React.PointerEvent<HTMLCanvasElement>;
@@ -36,6 +44,10 @@ export interface ICurrentToolParams {
   width: number;
   height: number;
   firstPixelPos: PixelPosition;
+  dispatch: AppDispatch;
+  setColorParams: ActionColorParams;
+  allPresetColors: ColorParams[];
+  currPreset: ColorParams[];
 }
 
 export interface IDrawingCanvasProps {

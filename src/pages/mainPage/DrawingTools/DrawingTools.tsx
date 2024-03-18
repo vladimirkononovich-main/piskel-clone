@@ -13,6 +13,7 @@ function DrawingTools() {
   const tools = [
     { className: "pen-tool", toolFuncName: "penTool" },
     { className: "stroke-tool", toolFuncName: "strokeTool" },
+    { className: "picker-tool", toolFuncName: "pickerTool" },
   ];
 
   return (

@@ -89,7 +89,6 @@ const Main = () => {
         className="main__middle-section"
         onPointerMove={pointerHandler}
         onPointerDown={pointerHandler}
-        // onPointerUp={pointerHandler}
         onWheel={(e) => changeDrawingCanvasScale(e)}
         ref={middleSectionRef}
       >

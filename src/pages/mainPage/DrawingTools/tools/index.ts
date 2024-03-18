@@ -2,6 +2,7 @@ import { strokeTool } from "./strokeTool";
 import { ICurrentToolParams, PixelPosition } from "../../DrawingCanvas/models";
 import { getFillRectXY } from "../../DrawingCanvas/prefillingTheRectangle";
 import { penTool } from "./penTool";
+import { pickerTool } from "./pickerTool";
 
 export const preDrawPixelsOnCanvas = (
   params: ICurrentToolParams,
@@ -25,7 +26,7 @@ export const addPixelsToMatrix = (
   const width = params.width;
   const height = params.height;
   const { r, g, b, a } = params.fillRectArgs.clickRGBA;
-  const alphaUINT8 = a * 255
+  const alphaUINT8 = a * 255;
 
   const clearedWay = way.filter((pixel) => {
     if (pixel.xIndex! < 0 || pixel.yIndex! < 0) return false;
@@ -38,4 +39,4 @@ export const addPixelsToMatrix = (
   });
 };
 
-export const drawingToolFunctions = { penTool, strokeTool };
+export const drawingToolFunctions = { penTool, strokeTool, pickerTool };

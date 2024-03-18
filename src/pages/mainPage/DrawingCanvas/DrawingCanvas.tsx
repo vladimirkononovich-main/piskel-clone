@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../hooks";
 import { RootState } from "../../../store";
+import {
+  setLeftColorParams,
+  setRightColorParams,
+} from "../ColorPicker/colorPickerSlice";
+import { ColorParams } from "../ColorPicker/models";
 import { drawingToolFunctions } from "../DrawingTools/tools";
-import {  RGBA } from "../models";
+import { RGBA } from "../models";
 import { setScale } from "./drawingCanvasSlice";
 import {
   IDrawingCanvasProps,
@@ -12,6 +17,7 @@ import {
   ICurrentToolParams,
   IFillRectArgs,
   PixelPosition,
+  ActionColorParams,
 } from "./models";
 import { getFillRectXY } from "./prefillingTheRectangle";
 
@@ -38,9 +44,12 @@ const DrawingCanvas = React.forwardRef(
     const { currentToolName } = useAppSelector(
       (state: RootState) => state.drawingTools
     );
-    const { leftColorParams, rightColorParams } = useAppSelector(
-      (state: RootState) => state.colorPicker
-    );
+    const {
+      leftColorParams,
+      rightColorParams,
+      presetColorsLeft,
+      presetColorsRight,
+    } = useAppSelector((state: RootState) => state.colorPicker);
     const dispatch = useAppDispatch();
     const drawingCanvas = useAppSelector(
       (state: RootState) => state.drawingCanvas
@@ -312,15 +321,28 @@ const DrawingCanvas = React.forwardRef(
         ((top < 0 ? Math.abs(top) : 0) + offsetY) / scale
       );
       let rgba: RGBA;
+      let currPreset: ColorParams[];
+      let setColorParams: ActionColorParams;
 
-      if (e.buttons === 1 || e.button === 0) rgba = leftColorParams;
-      if (e.buttons === 2 || e.button === 2) rgba = rightColorParams;
-      if (!rgba!) return;
+      if (e.buttons === 1 || e.button === 0) {
+        rgba = leftColorParams;
+        currPreset = presetColorsLeft;
+        setColorParams = setLeftColorParams;
+      }
+
+      if (e.buttons === 2 || e.button === 2) {
+        rgba = rightColorParams;
+        currPreset = presetColorsRight;
+        setColorParams = setRightColorParams;
+      }
+
+      if (!rgba! || !currPreset! || !setColorParams!) return;
 
       const fillRectArgs: IFillRectArgs = {
         ...getFillRectXY(xIndex, yIndex, scale),
         clickRGBA: rgba!,
       };
+      const allPresetColors = [...presetColorsLeft, ...presetColorsRight];
 
       const args: ICurrentToolParams = {
         e,
@@ -333,6 +355,10 @@ const DrawingCanvas = React.forwardRef(
         width,
         height,
         firstPixelPos,
+        dispatch,
+        allPresetColors,
+        currPreset,
+        setColorParams,
       };
 
       currentTool(args);

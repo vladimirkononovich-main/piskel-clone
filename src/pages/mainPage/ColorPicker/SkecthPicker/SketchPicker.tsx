@@ -39,7 +39,7 @@ function SketchPicker({
     paletteHTML = paletteRef.current!;
   });
 
-  useEffect(() => {
+  const dispatchColorToGlobalState = () => {
     const [r, g, b, a] = chroma(getColorHEX()).rgba();
     const rgba = { r, g, b, a };
 
@@ -51,7 +51,7 @@ function SketchPicker({
         palletY: palettePos.y,
       })
     );
-  }, [hueDeg, palettePos]);
+  };
 
   const getColorHEX = () => {
     if (palettePos.x === null || palettePos.y === null)
@@ -84,6 +84,7 @@ function SketchPicker({
       hueSliderHTML.style.cursor = "pointer";
     }
     if (e.type === "pointerup") {
+      dispatchColorToGlobalState();
       hueSliderHTML.releasePointerCapture(e.pointerId);
       hueSliderHTML.style.cursor = "default";
     }
@@ -113,6 +114,7 @@ function SketchPicker({
       paletteHTML.style.cursor = "pointer";
     }
     if (e.type === "pointerup") {
+      dispatchColorToGlobalState();
       paletteHTML.releasePointerCapture(e.pointerId);
       paletteHTML.style.cursor = "default";
     }
@@ -134,22 +136,20 @@ function SketchPicker({
     <div className="sketch-picker" style={styles}>
       <div className="preset-colors">
         {presetColors.map((color, index) => {
-          const { r, g, b, a, hueY, palletX, palletY } = color;
-          const { r: r2, g: g2, b: b2, a: a2 } = colorParams;
+          const { r, g, b, a } = color;
+          const rgba = colorParams;
           const stringRGBA = `rgba(${r},${g},${b},${a})`;
           const style: CSSProperties = { backgroundColor: stringRGBA };
 
           if (a === 0) style.backgroundImage = `url(${opacityBackground})`;
-          const isSameColor = r === r2 && g === g2 && b === b2 && a === a2;
-          const hueDeg = Math.round((360 / hueHeight) * hueY);
+          const isSameColor =
+            r === rgba.r && g === rgba.g && b === rgba.b && a === rgba.a;
 
           return (
             <div
               key={index}
               onClick={() => {
-                setHueDeg(hueDeg);
-                setHueY(hueY);
-                setPalettePos({ x: palletX, y: palletY });
+                dispatch(setColorParams({ ...color }));
               }}
               className={classNames("preset-colors__color", {
                 "preset-colors__color_selected": isSameColor,
