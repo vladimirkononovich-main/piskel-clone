@@ -12,12 +12,13 @@ export const penTool = (params: ICurrentToolParams) => {
     return;
   }
 
+  const { r, g, b, a } = params.fillRectArgs.clickRGBA;
+  const alphaUINT8 = a * 255
   const ctx = params.ctx;
   const fillRectArgs = params.fillRectArgs;
   const xIndex = params.xIndex;
   const yIndex = params.yIndex;
   const scale = params.scale;
-  const rgba = params.fillRectArgs.clickRGBA;
   const matrix = params.matrix;
   const width = params.width;
   const height = params.height;
@@ -33,11 +34,12 @@ export const penTool = (params: ICurrentToolParams) => {
     return;
   }
 
-  ctx.fillStyle = `rgba(${rgba[0]},${rgba[1]},${rgba[2]},${rgba[3]})`;
+  ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
+  ctx.clearRect(fillRectArgs.x, fillRectArgs.y, scale, scale);
   ctx.fillRect(fillRectArgs.x, fillRectArgs.y, scale, scale);
 
-  if (xIndex > 0 && xIndex < width && yIndex > 0 && yIndex < height) {
-    matrix[yIndex][xIndex] = rgba;
+  if (xIndex >= 0 && xIndex < width && yIndex >= 0 && yIndex < height) {
+    matrix[yIndex][xIndex] = [r, g, b, alphaUINT8];
   }
 
   prevPixel.xIndex = xIndex;

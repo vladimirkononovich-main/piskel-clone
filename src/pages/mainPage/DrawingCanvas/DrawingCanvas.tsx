@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../hooks";
 import { RootState } from "../../../store";
 import { drawingToolFunctions } from "../DrawingTools/tools";
-import { IRGBA } from "../models";
+import {  RGBA } from "../models";
 import { setScale } from "./drawingCanvasSlice";
 import {
   IDrawingCanvasProps,
@@ -35,17 +35,19 @@ const DrawingCanvas = React.forwardRef(
     const [scalingParams, setScalingParams] = useState<IScalingParams | null>(
       null
     );
-    const drawingTools = useAppSelector(
+    const { currentToolName } = useAppSelector(
       (state: RootState) => state.drawingTools
+    );
+    const { leftColorParams, rightColorParams } = useAppSelector(
+      (state: RootState) => state.colorPicker
     );
     const dispatch = useAppDispatch();
     const drawingCanvas = useAppSelector(
       (state: RootState) => state.drawingCanvas
     );
     const currentTool =
-      drawingToolFunctions[
-        drawingTools.currentToolName as keyof IDrawingToolFunctions
-      ];
+      drawingToolFunctions[currentToolName as keyof IDrawingToolFunctions];
+
     scale = drawingCanvas.scale;
     let drawingCanvasHTML: HTMLCanvasElement;
     let ctx: CanvasRenderingContext2D;
@@ -309,12 +311,10 @@ const DrawingCanvas = React.forwardRef(
       const yIndex = Math.floor(
         ((top < 0 ? Math.abs(top) : 0) + offsetY) / scale
       );
-      let rgba: IRGBA;
+      let rgba: RGBA;
 
-      if (e.buttons === 1 || e.button === 0)
-        rgba = drawingTools.colorRGBALeftClick;
-      if (e.buttons === 2 || e.button === 2)
-        rgba = drawingTools.colorRGBARightClick;
+      if (e.buttons === 1 || e.button === 0) rgba = leftColorParams;
+      if (e.buttons === 2 || e.button === 2) rgba = rightColorParams;
       if (!rgba!) return;
 
       const fillRectArgs: IFillRectArgs = {

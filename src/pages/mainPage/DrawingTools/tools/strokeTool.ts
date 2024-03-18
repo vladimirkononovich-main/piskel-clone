@@ -7,7 +7,6 @@ let prevWay: PixelPosition[] = [];
 
 export const strokeTool = (params: ICurrentToolParams) => {
   const e = params.e;
-
   const xIndex = params.xIndex;
   const yIndex = params.yIndex;
   const firstPixel = params.firstPixelPos;
@@ -30,9 +29,8 @@ export const strokeTool = (params: ICurrentToolParams) => {
     if (elem.yIndex! < 0 || elem.yIndex! >= height) return;
     if (elem.xIndex! < 0 || elem.xIndex! >= width) return;
 
-    const rgba = matrix[elem.yIndex!][elem.xIndex!];
-
-    params.ctx.fillStyle = `rgba(${rgba[0]},${rgba[1]},${rgba[2]},${rgba[3]})`;
+    const [r, g, b, a] = matrix[elem.yIndex!][elem.xIndex!];
+    params.ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
     const coordinates = getFillRectXY(elem.xIndex!, elem.yIndex!, scale);
 
     params.ctx.clearRect(coordinates.x, coordinates.y, scale, scale);
@@ -46,7 +44,7 @@ export const strokeTool = (params: ICurrentToolParams) => {
     addPixelsToMatrix(params, currWay);
     firstPixel.xIndex = null;
     firstPixel.yIndex = null;
-    return
+    return;
   }
   prevWay = currWay;
 };

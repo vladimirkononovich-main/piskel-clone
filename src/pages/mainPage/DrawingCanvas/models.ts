@@ -1,4 +1,4 @@
-import { IRGBA, Pixel } from "../models";
+import {  Pixel, RGBA } from "../models";
 
 export interface IScalingParams {
   event: React.WheelEvent<HTMLCanvasElement> | null;
@@ -22,7 +22,7 @@ export type PixelPosition = {
 export interface IFillRectArgs {
   x: number;
   y: number;
-  clickRGBA: IRGBA;
+  clickRGBA: RGBA;
 }
 
 export interface ICurrentToolParams {

@@ -5,8 +5,8 @@ const initialState: IDrawingToolsState = {
   penSize: 1,
   penSizes: [1, 2, 3, 4],
   currentToolName: "penTool",
-  colorRGBALeftClick: [0, 0, 0, 255],
-  colorRGBARightClick: [0, 255, 0, 255],
+  // colorRGBALeftClick: [0, 0, 0, 255],
+  // colorRGBARightClick: [0, 255, 0, 255],
 };
 
 export const drawingToolsSlice = createSlice({
