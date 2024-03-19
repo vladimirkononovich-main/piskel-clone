@@ -7,6 +7,9 @@
 .main__eraser-tool {
   background-position: -46px -228px;
 }
+.main__dithering-tool {
+  background-position: 0px -228px;
+}
 .main__paint-pixels-same-color-tool {
   background-position: -228px -138px;
 }

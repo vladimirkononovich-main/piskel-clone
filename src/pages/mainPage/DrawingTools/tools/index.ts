@@ -5,6 +5,7 @@ import { penTool } from "./penTool";
 import { pickerTool } from "./pickerTool";
 import { eraserTool } from "./eraserTool";
 import { paintPixelsSameColorTool } from "./paintPixelsSameColorTool";
+import { ditheringTool } from "./ditheringTool";
 
 export const preDrawPixelsOnCanvas = (
   params: ICurrentToolParams,
@@ -47,4 +48,5 @@ export const drawingToolFunctions = {
   pickerTool,
   eraserTool,
   paintPixelsSameColorTool,
+  ditheringTool,
 };

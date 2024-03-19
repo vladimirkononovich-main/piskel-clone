@@ -19,6 +19,7 @@ function DrawingTools() {
       className: "paint-pixels-same-color-tool",
       toolFuncName: "paintPixelsSameColorTool",
     },
+    { className: "dithering-tool", toolFuncName: "ditheringTool" },
   ];
 
   return (

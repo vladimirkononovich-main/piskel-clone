@@ -26,6 +26,10 @@ export interface IFillRectArgs {
   x: number;
   y: number;
   clickRGBA: RGBA;
+  colorPicker: {
+    left: ColorParams,
+    right: ColorParams
+  }
 }
 
 export type ActionColorParams = ActionCreatorWithPayload<

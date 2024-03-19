@@ -345,6 +345,10 @@ const DrawingCanvas = React.forwardRef(
 
       const fillRectArgs: IFillRectArgs = {
         ...getFillRectXY(xIndex, yIndex, scale),
+        colorPicker: {
+          left: leftColorParams,
+          right: rightColorParams,
+        },
         clickRGBA: rgba!,
       };
       const allPresetColors = [...presetColorsLeft, ...presetColorsRight];
