@@ -48,6 +48,7 @@ export interface ICurrentToolParams {
   setColorParams: ActionColorParams;
   allPresetColors: ColorParams[];
   currPreset: ColorParams[];
+  updateCanvas: () => void;
 }
 
 export interface IDrawingCanvasProps {

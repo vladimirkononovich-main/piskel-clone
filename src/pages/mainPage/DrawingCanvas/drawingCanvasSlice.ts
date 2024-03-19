@@ -2,8 +2,8 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { IDrawingCanvasInitState } from "./models";
 
 const initialState: IDrawingCanvasInitState = {
-  width: 50,
-  height: 50,
+  width: 100,
+  height: 100,
   scale: 1,
 };
 

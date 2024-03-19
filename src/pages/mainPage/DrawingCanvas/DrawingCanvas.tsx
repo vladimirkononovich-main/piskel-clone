@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../hooks";
 import { RootState } from "../../../store";
 import {
@@ -67,18 +67,23 @@ const DrawingCanvas = React.forwardRef(
     let visibleWidth: number;
     let visibleHeight: number;
 
-    const cropped = {
-      top: scale,
-      right: scale,
-      bott: scale,
-      left: scale,
-    };
-    const overflow = {
-      top: 0,
-      right: 0,
-      bott: 0,
-      left: 0,
-    };
+    const cropped = useMemo(() => {
+      return {
+        top: scale,
+        right: scale,
+        bott: scale,
+        left: scale,
+      };
+    }, [scale]);
+
+    const overflow = useMemo(() => {
+      return {
+        top: 0,
+        right: 0,
+        bott: 0,
+        left: 0,
+      };
+    }, []);
 
     let widthToScale = drawingCanvas.width * drawingCanvas.scale;
     let heightToScale = drawingCanvas.height * drawingCanvas.scale;
@@ -94,8 +99,8 @@ const DrawingCanvas = React.forwardRef(
       parentWidth = parent.clientWidth;
       parentHeight = parent.clientHeight;
 
-      visibleWidth = Math.min(widthToScale, parentWidth);
-      visibleHeight = Math.min(heightToScale, parentHeight);
+      visibleWidth = Math.min(right, parentWidth) - Math.max(left, 0);
+      visibleHeight = Math.min(bottom, parentHeight) - Math.max(top, 0);
 
       ctx = drawingCanvasHTML.getContext("2d", { willReadFrequently: true })!;
       if (!matrix) initDrawingCanvasMatrix();
@@ -359,6 +364,7 @@ const DrawingCanvas = React.forwardRef(
         allPresetColors,
         currPreset,
         setColorParams,
+        updateCanvas,
       };
 
       currentTool(args);
@@ -390,6 +396,14 @@ const DrawingCanvas = React.forwardRef(
           dispatch(setScale(scale - Math.max(step, minScale)));
       });
     };
+
+    // console.log(
+    //   "RERENDER",
+    //   "cropped",
+    //   cropped,
+    //   "visibleHeight",
+    //   visibleHeight!
+    // );
 
     return (
       <canvas

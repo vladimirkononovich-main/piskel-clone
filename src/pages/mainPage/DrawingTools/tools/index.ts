@@ -4,6 +4,7 @@ import { getFillRectXY } from "../../DrawingCanvas/prefillingTheRectangle";
 import { penTool } from "./penTool";
 import { pickerTool } from "./pickerTool";
 import { eraserTool } from "./eraserTool";
+import { paintPixelsSameColorTool } from "./paintPixelsSameColorTool";
 
 export const preDrawPixelsOnCanvas = (
   params: ICurrentToolParams,
@@ -45,4 +46,5 @@ export const drawingToolFunctions = {
   strokeTool,
   pickerTool,
   eraserTool,
+  paintPixelsSameColorTool,
 };

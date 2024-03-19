@@ -15,6 +15,10 @@ function DrawingTools() {
     { className: "stroke-tool", toolFuncName: "strokeTool" },
     { className: "picker-tool", toolFuncName: "pickerTool" },
     { className: "eraser-tool", toolFuncName: "eraserTool" },
+    {
+      className: "paint-pixels-same-color-tool",
+      toolFuncName: "paintPixelsSameColorTool",
+    },
   ];
 
   return (
