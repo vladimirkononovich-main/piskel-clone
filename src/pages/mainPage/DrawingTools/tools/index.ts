@@ -3,6 +3,7 @@ import { ICurrentToolParams, PixelPosition } from "../../DrawingCanvas/models";
 import { getFillRectXY } from "../../DrawingCanvas/prefillingTheRectangle";
 import { penTool } from "./penTool";
 import { pickerTool } from "./pickerTool";
+import { eraserTool } from "./eraserTool";
 
 export const preDrawPixelsOnCanvas = (
   params: ICurrentToolParams,
@@ -39,4 +40,9 @@ export const addPixelsToMatrix = (
   });
 };
 
-export const drawingToolFunctions = { penTool, strokeTool, pickerTool };
+export const drawingToolFunctions = {
+  penTool,
+  strokeTool,
+  pickerTool,
+  eraserTool,
+};

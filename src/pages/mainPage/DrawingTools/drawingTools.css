@@ -4,6 +4,10 @@
 .main__picker-tool {
   background-position: -274px 0px;
 }
+.main__eraser-tool {
+  background-position: -46px -228px;
+}
+
 .main__drawing-tools {
   width: 100px;
   display: flex;
