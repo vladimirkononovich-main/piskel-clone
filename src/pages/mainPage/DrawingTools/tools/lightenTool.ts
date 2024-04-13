@@ -1,7 +1,5 @@
-import { addPixelsToMatrix, preDrawPixelsOnCanvas } from ".";
-import { RGBA } from "../../ColorPicker/models";
+import { fillPixel } from ".";
 import { ICurrentToolParams } from "../../DrawingCanvas/models";
-import { getFillRectXY } from "../../DrawingCanvas/prefillingTheRectangle";
 import { connectTwoPixels } from "./pixelConnector";
 
 const lightenRGBA = (rgba: number[]) => {
@@ -21,31 +19,29 @@ const darkenRGBA = (rgba: number[]) => {
 };
 
 export const lightenTool = (params: ICurrentToolParams) => {
-  if (!params.matrix) return;
-  const prevPixel = params.firstPixelPos;
-
+  const start = params.pointerStart;
   if (params.e.type === "pointerup") {
-    prevPixel.xIndex = null;
-    prevPixel.yIndex = null;
+    start.x = null;
+    start.y = null;
     return;
   }
 
+  const e = params.e;
   const ctx = params.ctx;
-  const fillRectArgs = params.fillRectArgs;
+  const width = params.width;
   const xIndex = params.xIndex;
   const yIndex = params.yIndex;
-  const scale = params.scale;
   const matrix = params.matrix;
-  const width = params.width;
   const height = params.height;
-  const e = params.e;
+  const rowsColsValues = params.rowsColsValues;
+  const drawVisibleArea = params.drawVisibleArea;
 
   let transformColor: (rgba: number[]) => number[];
 
   if (e.buttons === 1 || e.button === 0) transformColor = lightenRGBA;
   if (e.buttons === 2 || e.button === 2) transformColor = darkenRGBA;
 
-  if (prevPixel.xIndex !== null && prevPixel.yIndex !== null) {
+  if (start.x !== null && start.y !== null) {
     const way = connectTwoPixels(params);
     const clearedWay = way.filter((pixel) => {
       if (pixel.xIndex! < 0 || pixel.yIndex! < 0) return false;
@@ -54,32 +50,33 @@ export const lightenTool = (params: ICurrentToolParams) => {
     });
 
     clearedWay.forEach((pix) => {
-      const [r, g, b, a] = matrix[pix.yIndex!][pix.xIndex!];
+      const r = matrix.red[pix.xIndex! + width * pix.yIndex!];
+      const g = matrix.green[pix.xIndex! + width * pix.yIndex!];
+      const b = matrix.blue[pix.xIndex! + width * pix.yIndex!];
+      const a = matrix.alpha[pix.xIndex! + width * pix.yIndex!];
       if (a === 0) return;
 
-      const newRGBA = transformColor([r, g, b, a]);
-      matrix[pix.yIndex!][pix.xIndex!] = newRGBA;
-      ctx.fillStyle = `rgba(${newRGBA[0]},${newRGBA[1]},${newRGBA[2]},${newRGBA[3]})`;
-      
-      const coordinates = getFillRectXY(pix.xIndex!, pix.yIndex!, scale);
-      ctx.clearRect(coordinates.x, coordinates.y, scale, scale);
-      ctx.fillRect(coordinates.x, coordinates.y, scale, scale);
+      const [r1, g1, b1, a1] = transformColor([r, g, b, a]);
+      fillPixel(matrix, width, pix.xIndex!, pix.yIndex!, r1, g1, b1, a1);
+      drawVisibleArea(height, width, ctx, rowsColsValues, matrix);
     });
 
-    prevPixel.xIndex = xIndex;
-    prevPixel.yIndex = yIndex;
+    start.x = xIndex;
+    start.y = yIndex;
     return;
   }
 
   if (xIndex >= 0 && xIndex < width && yIndex >= 0 && yIndex < height) {
-    const pixel = matrix[yIndex][xIndex];
-    const [r, g, b, a] = transformColor!(pixel);
-    ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
-    ctx.clearRect(fillRectArgs.x, fillRectArgs.y, scale, scale);
-    ctx.fillRect(fillRectArgs.x, fillRectArgs.y, scale, scale);
-    matrix[yIndex][xIndex] = [r, g, b, a];
+    const r = matrix.red[xIndex + width * yIndex];
+    const g = matrix.green[xIndex + width * yIndex];
+    const b = matrix.blue[xIndex + width * yIndex];
+    const a = matrix.alpha[xIndex + width * yIndex];
+
+    const [r1, g1, b1, a1] = transformColor!([r, g, b, a]);
+    fillPixel(matrix, width, xIndex, yIndex, r1, g1, b1, a1);
+    drawVisibleArea(height, width, ctx, rowsColsValues, matrix);
   }
 
-  prevPixel.xIndex = xIndex;
-  prevPixel.yIndex = yIndex;
+  start.x = xIndex;
+  start.y = yIndex;
 };

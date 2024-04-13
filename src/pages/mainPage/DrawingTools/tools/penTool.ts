@@ -1,47 +1,43 @@
-import { addPixelsToMatrix, preDrawPixelsOnCanvas } from ".";
+import { addPixelsToMatrix } from ".";
 import { ICurrentToolParams } from "../../DrawingCanvas/models";
 import { connectTwoPixels } from "./pixelConnector";
 
 export const penTool = (params: ICurrentToolParams) => {
-  if (!params.matrix) return;
-  const prevPixel = params.firstPixelPos;
-
+  const start = params.pointerStart;
   if (params.e.type === "pointerup") {
-    prevPixel.xIndex = null;
-    prevPixel.yIndex = null;
+    start.x = null;
+    start.y = null;
     return;
   }
 
   const { r, g, b, a } = params.fillRectArgs.clickRGBA;
-  const alphaUINT8 = a * 255
+  const alphaUINT8 = a * 255;
   const ctx = params.ctx;
-  const fillRectArgs = params.fillRectArgs;
   const xIndex = params.xIndex;
   const yIndex = params.yIndex;
-  const scale = params.scale;
-  const matrix = params.matrix;
   const width = params.width;
   const height = params.height;
+  const matrix = params.matrix;
+  const rowsColsValues = params.rowsColsValues;
+  const drawVisibleArea = params.drawVisibleArea;
 
-  if (prevPixel.xIndex !== null && prevPixel.yIndex !== null) {
+  if (start.x !== null && start.y !== null) {
     const way = connectTwoPixels(params);
-    preDrawPixelsOnCanvas(params, way);
     addPixelsToMatrix(params, way);
-
-    prevPixel.xIndex = xIndex;
-    prevPixel.yIndex = yIndex;
-
+    start.x = xIndex;
+    start.y = yIndex;
+    drawVisibleArea(height, width, ctx, rowsColsValues, matrix);
     return;
   }
 
-  ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
-  ctx.clearRect(fillRectArgs.x, fillRectArgs.y, scale, scale);
-  ctx.fillRect(fillRectArgs.x, fillRectArgs.y, scale, scale);
-
   if (xIndex >= 0 && xIndex < width && yIndex >= 0 && yIndex < height) {
-    matrix[yIndex][xIndex] = [r, g, b, alphaUINT8];
+    matrix.red[xIndex! + width * yIndex!] = r;
+    matrix.green[xIndex! + width * yIndex!] = g;
+    matrix.blue[xIndex! + width * yIndex!] = b;
+    matrix.alpha[xIndex! + width * yIndex!] = alphaUINT8;
   }
 
-  prevPixel.xIndex = xIndex;
-  prevPixel.yIndex = yIndex;
+  drawVisibleArea(height, width, ctx, rowsColsValues, matrix);
+  start.x = xIndex;
+  start.y = yIndex;
 };

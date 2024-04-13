@@ -4,8 +4,8 @@ export const connectTwoPixels = (params: ICurrentToolParams) => {
   const endX = params.xIndex;
   const endY = params.yIndex;
 
-  let y = params.firstPixelPos.yIndex!;
-  let x = params.firstPixelPos.xIndex!;
+  let y = params.pointerStart.y!;
+  let x = params.pointerStart.x!;
 
   const yInterval = endY > y ? endY - y + 1 : y - endY + 1 || 1;
   const xInterval = endX > x ? endX - x + 1 : x - endX + 1;

@@ -1,18 +1,20 @@
 import { ICurrentToolParams } from "../../DrawingCanvas/models";
 
 export const pickerTool = (params: ICurrentToolParams) => {
-  if (!params.matrix) return;
   if (params.e.type !== "pointerdown") return;
 
   const x = params.xIndex;
   const y = params.yIndex;
   const dispatch = params.dispatch;
   const presets = params.allPresetColors;
-  const [r, g, b, a] = params.matrix[y][x];
-  const alpha = a / 255;
+  const matrix = params.matrix;
+  const r = matrix.red[x + y * params.width];
+  const g = matrix.green[x + y * params.width];
+  const b = matrix.blue[x + y * params.width];
+  const a = matrix.alpha[x + y * params.width] / 255;
 
   const sameColor = presets.find((el) => {
-    return el.r === r && el.g === g && el.b === b && el.a === alpha;
+    return el.r === r && el.g === g && el.b === b && el.a === a;
   });
 
   if (sameColor) {
@@ -20,7 +22,7 @@ export const pickerTool = (params: ICurrentToolParams) => {
   } else {
     dispatch(
       params.setColorParams({
-        ...{ r, g, b, a: alpha },
+        ...{ r, g, b, a },
         hueY: 0,
         palletX: null,
         palletY: null,

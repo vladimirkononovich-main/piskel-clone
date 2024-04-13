@@ -10,6 +10,7 @@
   flex-basis: 225px;
 }
 .main__middle-section {
+  position: relative;
   flex-basis: 1430px;
   max-width: 1430px;
   background-color: #999;

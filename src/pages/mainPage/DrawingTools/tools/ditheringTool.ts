@@ -1,23 +1,25 @@
+import { fillPixel } from ".";
 import { ICurrentToolParams } from "../../DrawingCanvas/models";
-import { getFillRectXY } from "../../DrawingCanvas/prefillingTheRectangle";
 import { connectTwoPixels } from "./pixelConnector";
 
 export const ditheringTool = (params: ICurrentToolParams) => {
-  if (!params.matrix) return;
-  const prevPixel = params.firstPixelPos;
+  const start = params.pointerStart;
 
   if (params.e.type === "pointerup") {
-    prevPixel.xIndex = null;
-    prevPixel.yIndex = null;
+    start.x = null;
+    start.y = null;
     return;
   }
 
   const xIndex = params.xIndex;
   const yIndex = params.yIndex;
-  const scale = params.scale;
   const matrix = params.matrix;
   const width = params.width;
   const height = params.height;
+  const ctx = params.ctx;
+  const drawVisibleArea = params.drawVisibleArea;
+  const rowsColsValues = params.rowsColsValues;
+
   const e = params.e;
   let color1 = { ...params.fillRectArgs.colorPicker.left };
   let color2 = { ...params.fillRectArgs.colorPicker.right };
@@ -32,7 +34,7 @@ export const ditheringTool = (params: ICurrentToolParams) => {
   const { r: r1, g: g1, b: b1, a: a1 } = color1;
   const { r: r2, g: g2, b: b2, a: a2 } = color2;
 
-  if (prevPixel.xIndex !== null && prevPixel.yIndex !== null) {
+  if (start.x !== null && start.y !== null) {
     const way = connectTwoPixels(params);
     const clearedWay = way.filter((pixel) => {
       if (pixel.xIndex! < 0 || pixel.yIndex! < 0) return false;
@@ -41,62 +43,49 @@ export const ditheringTool = (params: ICurrentToolParams) => {
     });
 
     clearedWay.forEach((pixel) => {
+      const x = pixel.xIndex!;
+      const y = pixel.yIndex!;
       if (pixel.yIndex! % 2 !== 0) {
         if (pixel.xIndex! % 2 !== 0) {
-          params.ctx.fillStyle = `rgba(${r2},${g2},${b2},${a2})`;
-          matrix![pixel.yIndex!][pixel.xIndex!] = [r2, g2, b2, a2];
+          fillPixel(matrix, width, x, y, r2, g2, b2, a2);
         } else {
-          params.ctx.fillStyle = `rgba(${r1},${g1},${b1},${a1})`;
-          matrix![pixel.yIndex!][pixel.xIndex!] = [r1, g1, b1, a1];
+          fillPixel(matrix, width, x, y, r1, g1, b1, a1);
         }
       }
 
       if (pixel.yIndex! % 2 === 0) {
         if (pixel.xIndex! % 2 === 0) {
-          params.ctx.fillStyle = `rgba(${r2},${g2},${b2},${a2})`;
-          matrix![pixel.yIndex!][pixel.xIndex!] = [r2, g2, b2, a2];
+          fillPixel(matrix, width, x, y, r2, g2, b2, a2);
         } else {
-          params.ctx.fillStyle = `rgba(${r1},${g1},${b1},${a1})`;
-          matrix![pixel.yIndex!][pixel.xIndex!] = [r1, g1, b1, a1];
+          fillPixel(matrix, width, x, y, r1, g1, b1, a1);
         }
       }
-
-      const coordinates = getFillRectXY(pixel.xIndex!, pixel.yIndex!, scale);
-      params.ctx.clearRect(coordinates.x, coordinates.y, scale, scale);
-      params.ctx.fillRect(coordinates.x, coordinates.y, scale, scale);
     });
 
-    prevPixel.xIndex = xIndex;
-    prevPixel.yIndex = yIndex;
+    drawVisibleArea(height, width, ctx, rowsColsValues, matrix);
+    start.x = xIndex;
+    start.y = yIndex;
     return;
   }
 
   if (xIndex >= 0 && xIndex < width && yIndex >= 0 && yIndex < height) {
     if (yIndex! % 2 !== 0) {
       if (xIndex! % 2 !== 0) {
-        params.ctx.fillStyle = `rgba(${r2},${g2},${b2},${a2})`;
-        matrix![yIndex!][xIndex!] = [r2, g2, b2, a2];
+        fillPixel(matrix, width, xIndex!, yIndex!, r2, g2, b2, a2);
       } else {
-        params.ctx.fillStyle = `rgba(${r1},${g1},${b1},${a1})`;
-        matrix![yIndex!][xIndex!] = [r1, g1, b1, a1];
+        fillPixel(matrix, width, xIndex!, yIndex!, r1, g1, b1, a1);
       }
     }
-
     if (yIndex! % 2 === 0) {
       if (xIndex! % 2 === 0) {
-        params.ctx.fillStyle = `rgba(${r2},${g2},${b2},${a2})`;
-        matrix![yIndex!][xIndex!] = [r2, g2, b2, a2];
+        fillPixel(matrix, width, xIndex!, yIndex!, r2, g2, b2, a2);
       } else {
-        params.ctx.fillStyle = `rgba(${r1},${g1},${b1},${a1})`;
-        matrix![yIndex!][xIndex!] = [r1, g1, b1, a1];
+        fillPixel(matrix, width, xIndex!, yIndex!, r1, g1, b1, a1);
       }
     }
-
-    const coordinates = getFillRectXY(xIndex!, yIndex!, scale);
-    params.ctx.clearRect(coordinates.x, coordinates.y, scale, scale);
-    params.ctx.fillRect(coordinates.x, coordinates.y, scale, scale);
   }
 
-  prevPixel.xIndex = xIndex;
-  prevPixel.yIndex = yIndex;
+  drawVisibleArea(height, width, ctx, rowsColsValues, matrix);
+  start.x = xIndex;
+  start.y = yIndex;
 };

@@ -16,6 +16,9 @@
 .main__lighten-tool {
   background-position: -138px -228px;
 }
+.main__move-tool {
+  background-position: -184px -228px;
+}
 
 .main__drawing-tools {
   width: 100px;

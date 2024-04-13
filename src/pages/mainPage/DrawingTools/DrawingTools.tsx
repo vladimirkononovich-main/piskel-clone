@@ -21,6 +21,7 @@ function DrawingTools() {
     },
     { className: "dithering-tool", toolFuncName: "ditheringTool" },
     { className: "lighten-tool", toolFuncName: "lightenTool" },
+    { className: "move-tool", toolFuncName: "moveTool" },
   ];
 
   return (

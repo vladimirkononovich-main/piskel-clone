@@ -1,7 +1,10 @@
 import { connectTwoPixels } from "./pixelConnector";
-import { ICurrentToolParams, PixelPosition } from "../../DrawingCanvas/models";
-import { getFillRectXY } from "../../DrawingCanvas/prefillingTheRectangle";
-import { addPixelsToMatrix, preDrawPixelsOnCanvas } from ".";
+import {
+  ICurrentToolParams,
+  Matrix,
+  PixelPosition,
+} from "../../DrawingCanvas/models";
+import { addPixelsToMatrix } from ".";
 
 let prevWay: PixelPosition[] = [];
 
@@ -9,42 +12,39 @@ export const strokeTool = (params: ICurrentToolParams) => {
   const e = params.e;
   const xIndex = params.xIndex;
   const yIndex = params.yIndex;
-  const firstPixel = params.firstPixelPos;
-  const matrix = params.matrix!;
-  const scale = params.scale;
+  const start = params.pointerStart;
+  const matrix = params.matrix;
   const height = params.height;
   const width = params.width;
+  const ctx = params.ctx
+  const rowsColsValues = params.rowsColsValues
 
-  if (
-    e.type === "pointerdown" ||
-    firstPixel.xIndex === null ||
-    firstPixel.yIndex === null
-  ) {
-    firstPixel.xIndex = xIndex;
-    firstPixel.yIndex = yIndex;
+  if (e.type === "pointerdown" || start.x === null || start.y === null) {
+    start.x = xIndex;
+    start.y = yIndex;
     prevWay = connectTwoPixels(params);
   }
 
-  prevWay.forEach((elem) => {
-    if (elem.yIndex! < 0 || elem.yIndex! >= height) return;
-    if (elem.xIndex! < 0 || elem.xIndex! >= width) return;
+  const copyRed = new Uint8ClampedArray(matrix.red);
+  const copyGreen = new Uint8ClampedArray(matrix.green);
+  const copyBlue = new Uint8ClampedArray(matrix.blue);
+  const copyAlpha = new Uint8ClampedArray(matrix.alpha);
 
-    const [r, g, b, a] = matrix[elem.yIndex!][elem.xIndex!];
-    params.ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
-    const coordinates = getFillRectXY(elem.xIndex!, elem.yIndex!, scale);
-
-    params.ctx.clearRect(coordinates.x, coordinates.y, scale, scale);
-    params.ctx.fillRect(coordinates.x, coordinates.y, scale, scale);
-  });
+  const copyMatrix: Matrix = {
+    red: copyRed,
+    green: copyGreen,
+    blue: copyBlue,
+    alpha: copyAlpha,
+  };
 
   const currWay = connectTwoPixels(params);
-  preDrawPixelsOnCanvas(params, currWay);
+  addPixelsToMatrix({ ...params, matrix: copyMatrix }, currWay);
+  params.drawVisibleArea(height, width, ctx, rowsColsValues, copyMatrix)
 
   if (e.type === "pointerup") {
     addPixelsToMatrix(params, currWay);
-    firstPixel.xIndex = null;
-    firstPixel.yIndex = null;
+    start.x = null;
+    start.y = null;
     return;
   }
-  prevWay = currWay;
 };

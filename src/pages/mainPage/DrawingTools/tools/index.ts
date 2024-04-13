@@ -1,27 +1,12 @@
 import { strokeTool } from "./strokeTool";
-import { ICurrentToolParams, PixelPosition } from "../../DrawingCanvas/models";
-import { getFillRectXY } from "../../DrawingCanvas/prefillingTheRectangle";
+import { ICurrentToolParams, Matrix, PixelPosition } from "../../DrawingCanvas/models";
 import { penTool } from "./penTool";
 import { pickerTool } from "./pickerTool";
 import { eraserTool } from "./eraserTool";
 import { paintPixelsSameColorTool } from "./paintPixelsSameColorTool";
 import { ditheringTool } from "./ditheringTool";
 import { lightenTool } from "./lightenTool";
-
-export const preDrawPixelsOnCanvas = (
-  params: ICurrentToolParams,
-  way: PixelPosition[]
-) => {
-  const { r, g, b, a } = params.fillRectArgs.clickRGBA;
-  const scale = params.scale;
-
-  params.ctx.fillStyle = `rgba(${r},${g},${b},${a})`;
-  way.forEach((elem) => {
-    const coordinates = getFillRectXY(elem.xIndex!, elem.yIndex!, scale);
-    params.ctx.clearRect(coordinates.x, coordinates.y, scale, scale);
-    params.ctx.fillRect(coordinates.x, coordinates.y, scale, scale);
-  });
-};
+import { moveTool } from "./moveTool";
 
 export const addPixelsToMatrix = (
   params: ICurrentToolParams,
@@ -31,6 +16,7 @@ export const addPixelsToMatrix = (
   const height = params.height;
   const { r, g, b, a } = params.fillRectArgs.clickRGBA;
   const alphaUINT8 = a * 255;
+  const matrix = params.matrix;
 
   const clearedWay = way.filter((pixel) => {
     if (pixel.xIndex! < 0 || pixel.yIndex! < 0) return false;
@@ -39,9 +25,31 @@ export const addPixelsToMatrix = (
   });
 
   clearedWay.forEach((pixel) => {
-    params.matrix![pixel.yIndex!][pixel.xIndex!] = [r, g, b, alphaUINT8];
+    matrix.red[pixel.xIndex! + width * pixel.yIndex!] = r;
+    matrix.green[pixel.xIndex! + width * pixel.yIndex!] = g;
+    matrix.blue[pixel.xIndex! + width * pixel.yIndex!] = b;
+    matrix.alpha[pixel.xIndex! + width * pixel.yIndex!] = alphaUINT8;
   });
+
 };
+
+export const fillPixel = (
+  matrix: Matrix,
+  width: number,
+  x: number,
+  y: number,
+  r: number,
+  g: number,
+  b: number,
+  a: number
+) => {
+  matrix.red[x + width * y] = r;
+  matrix.green[x + width * y] = g;
+  matrix.blue[x + width * y] = b;
+  matrix.alpha[x + width * y] = a;
+};
+
+
 
 export const drawingToolFunctions = {
   penTool,
@@ -51,4 +59,5 @@ export const drawingToolFunctions = {
   paintPixelsSameColorTool,
   ditheringTool,
   lightenTool,
+  moveTool,
 };
