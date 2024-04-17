@@ -11,10 +11,10 @@ const scalingSteps = [
 ];
 
 const initialState: IDrawingCanvasInitState = {
-  width: 1000,
-  height: 1000,
-  scale: scalingSteps[0],
-  prevScale: scalingSteps[0],
+  width: 100  ,
+  height: 100,
+  scale: scalingSteps[30],
+  prevScale: scalingSteps[30],
   scalingSteps,
 };
 

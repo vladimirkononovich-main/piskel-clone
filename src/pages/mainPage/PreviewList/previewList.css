@@ -1,0 +1,110 @@
+.main__preview-list {
+  display: flex;
+  flex-direction: column;
+  overflow-y: scroll;
+  height: 100%;
+}
+.main__preview-list::-webkit-scrollbar {
+  width: 6px;
+}
+.main__preview-list::-webkit-scrollbar-track {
+  background: rgb(51, 51, 51);
+}
+.main__preview-list::-webkit-scrollbar-thumb {
+  background-color: rgb(97, 97, 97);
+  border-radius: 20px;
+}
+.main__add-frame-btn {
+  display: flex;
+  align-items: center;
+  margin-top: 8px;
+  padding: 6px 0;
+  overflow: hidden;
+  width: 96px;
+  border: #888 solid 3px;
+  border-radius: 4px;
+  color: #888;
+  background-color: #222;
+  font-size: 13px;
+  cursor: pointer;
+  min-height: 50px;
+}
+.main__add-frame-btn:hover {
+  border-color: gold;
+}
+.main__add-frame-btn .icon {
+  background-image: url(../../../assets/icons.png);
+  background-position: -274px -157px;
+  min-width: 26px;
+  min-height: 26px;
+  margin: 3px;
+}
+.main__add-frame-btn .label {
+  overflow: hidden;
+  text-align: left;
+}
+.main__preview-list-frame {
+  position: relative;
+  border: #444 3px solid;
+  border-radius: 3px;
+  margin: 5px 0 0 0;
+  min-width: 96px;
+  max-width: 96px;
+  min-height: 96px;
+  max-height: 96px;
+  background-image: url(../../../assets/canvas-background-img.png);
+  background-position: center;
+}
+.main__preview-list-frame_selected {
+  border-color: gold;
+}
+.main__preview-list-frame .frame-number {
+  font-family: Arial;
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  display: block;
+  opacity: 1;
+  border-bottom-right-radius: 3px;
+  top: 0;
+  left: 0;
+  font-size: 14px;
+  line-height: 30px;
+  font-weight: bold;
+  text-align: center;
+  cursor: default;
+  background-color: gold;
+  color: black;
+}
+.main__preview-list-frame .delete-frame-btn {
+  cursor: pointer;
+  z-index: 1;
+  position: absolute;
+  background-color: rgba(100, 100, 100, 0.6);
+  opacity: 0;
+  height: 30px;
+  width: 30px;
+  border: none;
+  top: 0;
+  right: 0;
+  background-image: url(../../../assets/icons.png);
+  background-position: -274px -106px;
+}
+.main__preview-list-frame:hover .delete-frame-btn,
+.main__preview-list-frame:hover .duplicate-frame-btn {
+  opacity: 1;
+}
+.main__preview-list-frame .duplicate-frame-btn {
+  cursor: pointer;
+  z-index: 1;
+  position: absolute;
+  background-color: rgba(100, 100, 100, 0.6);
+  opacity: 0;
+  height: 30px;
+  width: 30px;
+  border: none;
+  bottom: 0;
+  right: 0;
+  background-image: url(../../../assets/icons.png);
+  background-position: -274px -76px;
+}

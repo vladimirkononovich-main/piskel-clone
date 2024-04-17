@@ -6,10 +6,12 @@ import {
 } from "../ColorPicker/colorPickerSlice";
 import { ColorParams } from "../ColorPicker/models";
 import { drawingToolFunctions } from "../DrawingTools/tools";
+import { frames } from "../frames";
 import { RGBA } from "../models";
+import { createHashSHA256 } from "../PreviewList";
+import { changeFrameHash } from "../PreviewList/previewListSlice";
 import { centerTheCanvas } from "./centering";
 import { setScale, setPrevScale } from "./drawingCanvasSlice";
-import { matrixAlpha, matrixBlue, matrixGreen, matrixRed } from "./matrix";
 import {
   IDrawingToolFunctions,
   ICurrentToolParams,
@@ -41,19 +43,16 @@ function DrawingCanvas() {
     null
   );
   const { currentToolName } = useAppSelector((state) => state.drawingTools);
+  const { selectedFrameIndex } = useAppSelector((state) => state.previewList);
+
   const currentTool =
     drawingToolFunctions[currentToolName as keyof IDrawingToolFunctions];
 
+  const matrix: Matrix = frames[selectedFrameIndex];
+  
   let parentNode: HTMLDivElement;
   let canvasNode: HTMLCanvasElement;
   let ctx: CanvasRenderingContext2D;
-
-  const matrix: Matrix = {
-    red: matrixRed,
-    green: matrixGreen,
-    blue: matrixBlue,
-    alpha: matrixAlpha,
-  };
 
   const pointerStart = useMemo(() => {
     return {
@@ -130,6 +129,12 @@ function DrawingCanvas() {
     const rowsColsValues = calcRowsColsAllScales(scalingSteps, width, height);
     setRowsColsValues(rowsColsValues);
   }, [height, width]);
+
+  useEffect(() => {
+    if (!rowsColsValues) return;
+
+    drawVisibleArea(height, width, ctx, rowsColsValues, matrix);
+  }, [selectedFrameIndex, frames.length]);
 
   const drawVisibleArea = (
     height: number,
@@ -358,7 +363,13 @@ function DrawingCanvas() {
     };
 
     currentTool(args);
+
+    if (e.type === "pointerup") {
+      const hash = createHashSHA256(matrix);
+      dispatch(changeFrameHash({ frameIndex: selectedFrameIndex, hash }));
+    }
   };
+console.log('drC ');
 
   return (
     <div

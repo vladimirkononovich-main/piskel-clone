@@ -5,10 +5,20 @@
 }
 .main__left-section {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   justify-content: center;
   flex-basis: 225px;
 }
+.main__left-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.main__right-wrapper {
+  padding-right: 7px;
+  min-width: 115px;
+}
+
 .main__middle-section {
   position: relative;
   flex-basis: 1430px;

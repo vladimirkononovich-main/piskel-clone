@@ -13,6 +13,7 @@
     "@types/react-dom": "^18.2.17",
     "chroma-js": "^2.4.2",
     "classnames": "^2.3.3",
+    "crypto-js": "^4.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^9.0.4",
@@ -45,6 +46,7 @@
     ]
   },
   "devDependencies": {
-    "@types/chroma-js": "^2.4.4"
+    "@types/chroma-js": "^2.4.4",
+    "@types/crypto-js": "^4.2.2"
   }
 }
