@@ -4,6 +4,7 @@ import { ColorPicker } from "./ColorPicker/ColorPicker";
 import DrawingCanvas from "./DrawingCanvas/DrawingCanvas";
 import DrawingTools from "./DrawingTools/DrawingTools";
 import "./main.css";
+import MiniMap from "./MiniMap/MiniMap";
 import PreviewList from "./PreviewList/PreviewList";
 
 const Main = () => {
@@ -23,7 +24,11 @@ const Main = () => {
       </div>
       <DrawingCanvas />
       <div className="main__right-section">
-        <div className="main__drawing-canvas-info">x{scale}</div>
+        <div className="main__right-section-left-wrapper">
+          <MiniMap />
+          {/* <div className="main__drawing-canvas-info">x{scale}</div> */}
+        </div>
+        <div className="main__right-section-right-wrapper"></div>
       </div>
     </main>
   );

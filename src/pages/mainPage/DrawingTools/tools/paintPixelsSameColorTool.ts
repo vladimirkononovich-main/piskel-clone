@@ -39,7 +39,8 @@ export const paintPixelsSameColorTool = (params: ICurrentToolParams) => {
       width,
       params.ctx,
       params.rowsColsValues,
-      matrix
+      matrix,
+      params.scale
     );
   }
 };

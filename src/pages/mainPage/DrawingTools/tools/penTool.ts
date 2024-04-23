@@ -26,7 +26,7 @@ export const penTool = (params: ICurrentToolParams) => {
     addPixelsToMatrix(params, way);
     start.x = xIndex;
     start.y = yIndex;
-    drawVisibleArea(height, width, ctx, rowsColsValues, matrix);
+    drawVisibleArea(height, width, ctx, rowsColsValues, matrix, params.scale);
     return;
   }
 
@@ -37,7 +37,7 @@ export const penTool = (params: ICurrentToolParams) => {
     matrix.alpha[xIndex! + width * yIndex!] = alphaUINT8;
   }
 
-  drawVisibleArea(height, width, ctx, rowsColsValues, matrix);
+  drawVisibleArea(height, width, ctx, rowsColsValues, matrix, params.scale);
   start.x = xIndex;
   start.y = yIndex;
 };

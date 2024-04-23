@@ -1,5 +1,5 @@
-import { store } from "./../../store";
-import { Matrix } from "./DrawingCanvas/models";
+import { store } from "../../../store";
+import { Matrix } from "../DrawingCanvas/models";
 
 const { height, width } = store.getState().drawingCanvas;
 
@@ -11,6 +11,7 @@ export const createNewFrame = (width: number, height: number): Matrix => {
     alpha: new Uint8ClampedArray(width * height),
   };
 };
-export const defaultFrame = createNewFrame(width, height);
 
+
+export const defaultFrame = createNewFrame(width, height);
 export const frames: Matrix[] = [defaultFrame];

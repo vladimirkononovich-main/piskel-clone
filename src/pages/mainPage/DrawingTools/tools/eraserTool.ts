@@ -30,7 +30,7 @@ export const eraserTool = (params: ICurrentToolParams) => {
     addPixelsToMatrix({ ...params, fillRectArgs }, way);
     start.x = xIndex;
     start.y = yIndex;
-    drawVisibleArea(height, width, ctx, rowsColsValues, matrix);
+    drawVisibleArea(height, width, ctx, rowsColsValues, matrix, params.scale);
     return;
   }
 
@@ -41,7 +41,7 @@ export const eraserTool = (params: ICurrentToolParams) => {
     matrix.alpha[xIndex + width * yIndex] = 0;
   }
 
-  drawVisibleArea(height, width, ctx, rowsColsValues, matrix);
+  drawVisibleArea(height, width, ctx, rowsColsValues, matrix, params.scale);
   start.x = xIndex;
   start.y = yIndex;
 };

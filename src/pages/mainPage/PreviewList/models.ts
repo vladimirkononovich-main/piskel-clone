@@ -6,6 +6,7 @@ export type FrameProps = {
   isSelected: boolean;
   index: number;
   frame: Matrix;
+  hash: string;
 };
 
 export type PreviewListInitState = {

@@ -62,7 +62,7 @@ export const ditheringTool = (params: ICurrentToolParams) => {
       }
     });
 
-    drawVisibleArea(height, width, ctx, rowsColsValues, matrix);
+    drawVisibleArea(height, width, ctx, rowsColsValues, matrix, params.scale);
     start.x = xIndex;
     start.y = yIndex;
     return;
@@ -85,7 +85,7 @@ export const ditheringTool = (params: ICurrentToolParams) => {
     }
   }
 
-  drawVisibleArea(height, width, ctx, rowsColsValues, matrix);
+  drawVisibleArea(height, width, ctx, rowsColsValues, matrix, params.scale);
   start.x = xIndex;
   start.y = yIndex;
 };

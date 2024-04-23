@@ -78,7 +78,7 @@
 }
 .main__preview-list-frame .delete-frame-btn {
   cursor: pointer;
-  z-index: 1;
+  /* z-index: 1; */
   position: absolute;
   background-color: rgba(100, 100, 100, 0.6);
   opacity: 0;
@@ -96,7 +96,7 @@
 }
 .main__preview-list-frame .duplicate-frame-btn {
   cursor: pointer;
-  z-index: 1;
+  /* z-index: 1; */
   position: absolute;
   background-color: rgba(100, 100, 100, 0.6);
   opacity: 0;

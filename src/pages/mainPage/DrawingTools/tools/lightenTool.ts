@@ -58,7 +58,7 @@ export const lightenTool = (params: ICurrentToolParams) => {
 
       const [r1, g1, b1, a1] = transformColor([r, g, b, a]);
       fillPixel(matrix, width, pix.xIndex!, pix.yIndex!, r1, g1, b1, a1);
-      drawVisibleArea(height, width, ctx, rowsColsValues, matrix);
+      drawVisibleArea(height, width, ctx, rowsColsValues, matrix, params.scale);
     });
 
     start.x = xIndex;
@@ -74,7 +74,7 @@ export const lightenTool = (params: ICurrentToolParams) => {
 
     const [r1, g1, b1, a1] = transformColor!([r, g, b, a]);
     fillPixel(matrix, width, xIndex, yIndex, r1, g1, b1, a1);
-    drawVisibleArea(height, width, ctx, rowsColsValues, matrix);
+    drawVisibleArea(height, width, ctx, rowsColsValues, matrix, params.scale);
   }
 
   start.x = xIndex;

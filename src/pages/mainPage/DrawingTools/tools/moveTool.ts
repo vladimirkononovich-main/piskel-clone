@@ -56,7 +56,7 @@ export const moveTool = (params: ICurrentToolParams) => {
       alpha: copyAlpha,
     };
 
-    drawVisibleArea(height, width, ctx, rowsColsValues, copyMatrix);
+    drawVisibleArea(height, width, ctx, rowsColsValues, copyMatrix, params.scale);
   }
 
   if (params.e.type === "pointerup") {

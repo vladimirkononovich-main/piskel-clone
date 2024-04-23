@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { v4 as uuidv4 } from "uuid";
 import { useAppDispatch, useAppSelector } from "../../../hooks";
 import {
   setLeftColorParams,
@@ -6,12 +7,15 @@ import {
 } from "../ColorPicker/colorPickerSlice";
 import { ColorParams } from "../ColorPicker/models";
 import { drawingToolFunctions } from "../DrawingTools/tools";
-import { frames } from "../frames";
+import { frames } from "../frames/frames";
 import { RGBA } from "../models";
-import { createHashSHA256 } from "../PreviewList";
 import { changeFrameHash } from "../PreviewList/previewListSlice";
 import { centerTheCanvas } from "./centering";
-import { setScale, setPrevScale } from "./drawingCanvasSlice";
+import {
+  setScale,
+  setPrevScale,
+  setCanvasPosition,
+} from "./drawingCanvasSlice";
 import {
   IDrawingToolFunctions,
   ICurrentToolParams,
@@ -20,8 +24,115 @@ import {
   RowsColsValues,
   CanvasPosition,
   Matrix,
+  CenteringParams,
 } from "./models";
 import { calcIntervals, calcRowsColsAllScales } from "./scaling";
+
+export const drawVisibleArea = (
+  height: number,
+  width: number,
+  ctx: CanvasRenderingContext2D,
+  rowsColsValues: RowsColsValues,
+  matrix: Matrix,
+  scale: number
+) => {
+  const rowsHeightValues = rowsColsValues[scale].rows;
+  const colsWidthValues = rowsColsValues[scale].cols;
+
+  const coords = {
+    x1: 0,
+    x2: width,
+    y1: 0,
+    y2: height,
+    remainderTop: 0,
+    remainderLeft: 0,
+  };
+
+  calcIntervals(position.top, "y1", height, rowsHeightValues, coords);
+  calcIntervals(position.bot, "y2", height, rowsHeightValues, coords);
+  calcIntervals(position.left, "x1", width, colsWidthValues, coords);
+  calcIntervals(position.right, "x2", width, colsWidthValues, coords);
+
+  let x1 = coords.x1;
+  let x2 = coords.x2;
+  let y1 = coords.y1;
+  let y2 = coords.y2;
+  let remainderTop = coords.remainderTop;
+  let remainderLeft = coords.remainderLeft;
+
+  let sumHeight = 0;
+  let sumWidth = 0;
+  let rows = 0;
+  let cols = 0;
+
+  for (let i = y1; i < y2; i++) {
+    rows += 1;
+    sumHeight += rowsHeightValues[i];
+  }
+  for (let i = x1; i < x2; i++) {
+    cols += 1;
+    sumWidth += colsWidthValues[i];
+  }
+
+  const length = sumWidth * sumHeight * 4;
+  const data = new Uint8ClampedArray(length);
+
+  let curr = 0;
+
+  for (let y = y1; y < y2; y++) {
+    for (let h = 0; h < rowsHeightValues[y]; h++) {
+      for (let x = x1; x < x2; x++) {
+        const r = matrix.red[width * y + x];
+        const g = matrix.green[width * y + x];
+        const b = matrix.blue[width * y + x];
+        const a = matrix.alpha[width * y + x];
+
+        for (let w = 0; w < colsWidthValues[x]; w++) {
+          data[curr] = r;
+          data[curr + 1] = g;
+          data[curr + 2] = b;
+          data[curr + 3] = a;
+
+          curr += 4;
+        }
+      }
+    }
+  }
+
+  if (sumWidth < 1 || sumHeight < 1) return;
+  const imageData = new ImageData(data, sumWidth, sumHeight);
+
+  const layer = document.createElement("canvas");
+  layer.width = sumWidth;
+  layer.height = sumHeight;
+  const layerCtx = layer.getContext("2d");
+  layerCtx!.putImageData(imageData, 0, 0);
+
+  const croppedImageData = layerCtx!.getImageData(
+    remainderLeft,
+    remainderTop,
+    visibleW,
+    visibleH
+  );
+
+  ctx.putImageData(croppedImageData, 0, 0);
+};
+
+export let rowsColsValues: RowsColsValues | null = null;
+
+export const position: CanvasPosition = {
+  top: 0,
+  left: 0,
+  bot: 0,
+  right: 0,
+};
+
+export let visibleH = 0;
+export let visibleW = 0;
+
+export let ctx: CanvasRenderingContext2D;
+
+let handlerInProgress = false;
 
 function DrawingCanvas() {
   const parentRef = useRef(null);
@@ -39,9 +150,6 @@ function DrawingCanvas() {
   const [canvasEvent, setCanvasEvent] = useState<
     React.WheelEvent<HTMLCanvasElement> | null | string
   >("init");
-  const [rowsColsValues, setRowsColsValues] = useState<RowsColsValues | null>(
-    null
-  );
   const { currentToolName } = useAppSelector((state) => state.drawingTools);
   const { selectedFrameIndex } = useAppSelector((state) => state.previewList);
 
@@ -49,24 +157,14 @@ function DrawingCanvas() {
     drawingToolFunctions[currentToolName as keyof IDrawingToolFunctions];
 
   const matrix: Matrix = frames[selectedFrameIndex];
-  
+
   let parentNode: HTMLDivElement;
   let canvasNode: HTMLCanvasElement;
-  let ctx: CanvasRenderingContext2D;
 
   const pointerStart = useMemo(() => {
     return {
       x: null,
       y: null,
-    };
-  }, []);
-
-  const position: CanvasPosition = useMemo(() => {
-    return {
-      top: 0,
-      left: 0,
-      bot: 0,
-      right: 0,
     };
   }, []);
 
@@ -78,8 +176,7 @@ function DrawingCanvas() {
   let parentH: number;
   let parentW: number;
 
-  let visibleH = 0;
-  let visibleW = 0;
+  let centeringParams: CenteringParams;
 
   useEffect(() => {
     canvasNode = canvasRef.current!;
@@ -90,13 +187,8 @@ function DrawingCanvas() {
     parentW = parentNode.clientWidth;
     visibleW = Math.min(parentW, scaledW);
     visibleH = Math.min(parentH, scaledH);
-  });
 
-  useEffect(() => {
-    if (!rowsColsValues) return;
-    if (!canvasEvent) return;
-
-    const centeringParams = {
+    centeringParams = {
       canvasEvent,
       scaledH,
       scaledW,
@@ -113,6 +205,32 @@ function DrawingCanvas() {
       visibleH,
       visibleW,
     };
+  });
+
+  useEffect(() => {
+    if (!rowsColsValues) return;
+    if (!canvasEvent) return;
+
+    centerTheCanvas(centeringParams);
+
+    canvasNode.width = visibleW;
+    canvasNode.height = visibleH;
+
+    canvasNode.style.left = Math.max(position.left, 0) + "px";
+    canvasNode.style.top = Math.max(position.top, 0) + "px";
+
+    drawVisibleArea(height, width, ctx, rowsColsValues, matrix, scale);
+
+    setCanvasEvent(null);
+    handlerInProgress = false;
+  });
+
+  useEffect(() => {
+    rowsColsValues = calcRowsColsAllScales(scalingSteps, width, height);
+  }, [height, width]);
+
+  useEffect(() => {
+    if (!rowsColsValues) return;
 
     centerTheCanvas(centeringParams);
     canvasNode.width = visibleW;
@@ -121,111 +239,16 @@ function DrawingCanvas() {
     canvasNode.style.left = Math.max(position.left, 0) + "px";
     canvasNode.style.top = Math.max(position.top, 0) + "px";
 
-    drawVisibleArea(height, width, ctx, rowsColsValues, matrix);
-    setCanvasEvent(null);
-  });
-
-  useEffect(() => {
-    const rowsColsValues = calcRowsColsAllScales(scalingSteps, width, height);
-    setRowsColsValues(rowsColsValues);
-  }, [height, width]);
-
-  useEffect(() => {
-    if (!rowsColsValues) return;
-
-    drawVisibleArea(height, width, ctx, rowsColsValues, matrix);
+    drawVisibleArea(height, width, ctx, rowsColsValues, matrix, scale);
   }, [selectedFrameIndex, frames.length]);
 
-  const drawVisibleArea = (
-    height: number,
-    width: number,
-    ctx: CanvasRenderingContext2D,
-    rowsColsValues: RowsColsValues,
-    matrix: Matrix
-  ) => {
-    const rowsHeightValues = rowsColsValues[scale].rows;
-    const colsWidthValues = rowsColsValues[scale].cols;
+  useEffect(() => {
+    dispatch(setCanvasPosition({ ...position }));
+  }, [position.top, position.bot, position.left, position.right]);
 
-    const coords = {
-      x1: 0,
-      x2: width,
-      y1: 0,
-      y2: height,
-      remainderTop: 0,
-      remainderLeft: 0,
-    };
+  const onWhelHandler = async (e: React.WheelEvent<HTMLCanvasElement>) => {
+    if (handlerInProgress) return;
 
-    calcIntervals(position.top, "y1", height, rowsHeightValues, coords);
-    calcIntervals(position.bot, "y2", height, rowsHeightValues, coords);
-    calcIntervals(position.left, "x1", width, colsWidthValues, coords);
-    calcIntervals(position.right, "x2", width, colsWidthValues, coords);
-
-    let x1 = coords.x1;
-    let x2 = coords.x2;
-    let y1 = coords.y1;
-    let y2 = coords.y2;
-    let remainderTop = coords.remainderTop;
-    let remainderLeft = coords.remainderLeft;
-
-    let sumHeight = 0;
-    let sumWidth = 0;
-    let rows = 0;
-    let cols = 0;
-
-    for (let i = y1; i < y2; i++) {
-      rows += 1;
-      sumHeight += rowsHeightValues[i];
-    }
-    for (let i = x1; i < x2; i++) {
-      cols += 1;
-      sumWidth += colsWidthValues[i];
-    }
-
-    const length = sumWidth * sumHeight * 4;
-    const data = new Uint8ClampedArray(length);
-
-    let curr = 0;
-
-    for (let y = y1; y < y2; y++) {
-      for (let h = 0; h < rowsHeightValues[y]; h++) {
-        for (let x = x1; x < x2; x++) {
-          const r = matrix.red[width * y + x];
-          const g = matrix.green[width * y + x];
-          const b = matrix.blue[width * y + x];
-          const a = matrix.alpha[width * y + x];
-
-          for (let w = 0; w < colsWidthValues[x]; w++) {
-            data[curr] = r;
-            data[curr + 1] = g;
-            data[curr + 2] = b;
-            data[curr + 3] = a;
-
-            curr += 4;
-          }
-        }
-      }
-    }
-
-    if (sumWidth < 1 || sumHeight < 1) return;
-    const imageData = new ImageData(data, sumWidth, sumHeight);
-
-    const layer = document.createElement("canvas");
-    layer.width = sumWidth;
-    layer.height = sumHeight;
-    const layerCtx = layer.getContext("2d");
-    layerCtx!.putImageData(imageData, 0, 0);
-
-    const croppedImageData = layerCtx!.getImageData(
-      remainderLeft,
-      remainderTop,
-      visibleW,
-      visibleH
-    );
-
-    ctx.putImageData(croppedImageData, 0, 0);
-  };
-
-  const onWhelHandler = (e: React.WheelEvent<HTMLCanvasElement>) => {
     if (Math.sign(e.deltaY) === -1) {
       const stepIndex = scalingSteps.findIndex((el) => el === scale);
       const currScale = scalingSteps[stepIndex + 1];
@@ -247,6 +270,8 @@ function DrawingCanvas() {
       dispatch(setScale(currScale));
       setCanvasEvent(e);
     }
+
+    handlerInProgress = true;
   };
 
   const parentHandler = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -314,8 +339,16 @@ function DrawingCanvas() {
       }
       yIndex = lastY + Math.floor(diff / scale);
     }
-    if (offsetX < 0) xIndex = Math.floor(offsetX / scale);
-    if (offsetY < 0) yIndex = Math.floor(offsetY / scale);
+    if (offsetX < 0) {
+      xIndex =
+        Math.floor(Math.abs(Math.min(position.left, 0)) / scale) +
+        Math.floor(offsetX / scale);
+    }
+    if (offsetY < 0) {
+      yIndex =
+        Math.floor(Math.abs(Math.min(position.top, 0)) / scale) +
+        Math.floor(offsetY / scale);
+    }
 
     let rgba: RGBA;
     let currPreset: ColorParams[];
@@ -360,16 +393,16 @@ function DrawingCanvas() {
       matrix,
       rowsColsValues: rowsColsValues!,
       drawVisibleArea,
+      scale,
     };
 
     currentTool(args);
 
     if (e.type === "pointerup") {
-      const hash = createHashSHA256(matrix);
+      const hash = uuidv4();
       dispatch(changeFrameHash({ frameIndex: selectedFrameIndex, hash }));
     }
   };
-console.log('drC ');
 
   return (
     <div

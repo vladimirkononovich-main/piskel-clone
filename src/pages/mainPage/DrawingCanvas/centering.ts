@@ -153,6 +153,7 @@ export const centerTheCanvas = ({
   visibleH,
   visibleW,
 }: CenteringParams) => {
+    
   if (canvasEvent === "init") centerOnYAxis(parentH, scaledH, position);
   if (canvasEvent === "init") centerOnXAxis(parentW, scaledW, position);
 

@@ -26,11 +26,18 @@
   background-color: #999;
 }
 .main__right-section {
+  display: flex;
   position: relative;
   box-sizing: border-box;
   flex-basis: 265px;
   padding-left: 10px;
   padding-bottom: 20px;
+}
+.main__right-section-left-wrapper {
+  min-width: 200px;
+}
+.main__right-section-right-wrapper {
+  min-width: 47px;
 }
 .main__drawing-canvas-info {
   position: absolute;

@@ -60,12 +60,14 @@ export interface ICurrentToolParams {
   };
   matrix: Matrix;
   rowsColsValues: RowsColsValues;
+  scale: number;
   drawVisibleArea: (
     height: number,
     width: number,
     ctx: CanvasRenderingContext2D,
     rowsColsValues: RowsColsValues,
-    matrix: Matrix
+    matrix: Matrix,
+    scale: number
   ) => void;
 }
 
@@ -81,6 +83,7 @@ export interface IDrawingCanvasInitState {
   scale: number;
   prevScale: number;
   scalingSteps: number[];
+  canvasPosition: CanvasPosition
 }
 
 export type CanvasPosition = {
@@ -97,7 +100,7 @@ export type RowsColsValues = {
 };
 
 export type CenteringParams = {
-  canvasEvent: string | React.WheelEvent<HTMLCanvasElement>;
+  canvasEvent: string | React.WheelEvent<HTMLCanvasElement> | null;
   scaledH: number;
   scaledW: number;
   parentW: number;
@@ -107,7 +110,7 @@ export type CenteringParams = {
   position: CanvasPosition;
   prevScale: number;
   scale: number;
-  rowsColsValues: RowsColsValues;
+  rowsColsValues: RowsColsValues | null;
   height: number;
   width: number;
   visibleH: number;

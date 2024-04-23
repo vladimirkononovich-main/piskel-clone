@@ -39,7 +39,7 @@ export const strokeTool = (params: ICurrentToolParams) => {
 
   const currWay = connectTwoPixels(params);
   addPixelsToMatrix({ ...params, matrix: copyMatrix }, currWay);
-  params.drawVisibleArea(height, width, ctx, rowsColsValues, copyMatrix)
+  params.drawVisibleArea(height, width, ctx, rowsColsValues, copyMatrix, params.scale)
 
   if (e.type === "pointerup") {
     addPixelsToMatrix(params, currWay);

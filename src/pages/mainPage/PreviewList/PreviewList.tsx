@@ -1,9 +1,8 @@
 import classNames from "classnames";
 import { useEffect } from "react";
-import { createHashSHA256 } from ".";
 import { useAppDispatch, useAppSelector } from "../../../hooks";
 import { Matrix } from "../DrawingCanvas/models";
-import { createNewFrame, defaultFrame, frames } from "../frames";
+import { createNewFrame, frames } from "../frames/frames";
 import Frame from "./Frame";
 import "./previewList.css";
 import {
@@ -14,6 +13,9 @@ import {
   deleteFrameHash,
 } from "./previewListSlice";
 
+import { v4 as uuidv4 } from "uuid";
+import { framesPNG } from "../frames/framesPNG";
+
 const PreviewList = () => {
   const {
     selectedFrameIndex,
@@ -22,10 +24,12 @@ const PreviewList = () => {
     lastRenderedFrameIndex,
   } = useAppSelector((state) => state.previewList);
   const { height, width } = useAppSelector((state) => state.drawingCanvas);
+
   const dispatch = useAppDispatch();
 
   useEffect(() => {
-    const hash = createHashSHA256(defaultFrame);
+    const hash = uuidv4();
+
     dispatch(addFrameHash({ frameIndex: 0, hash }));
     dispatch(incrementFramesQuantity(1));
     dispatch(setRenderedFramesIndexes({ first: 0, last: frames.length - 1 }));
@@ -33,10 +37,10 @@ const PreviewList = () => {
 
   const addFrameHandler = () => {
     const newFrame = createNewFrame(width, height);
-    const hash = createHashSHA256(newFrame);
+    const hash = uuidv4();
     frames.push(newFrame);
 
-    dispatch(addFrameHash({ frameIndex: framesQuantity - 1, hash }));
+    dispatch(addFrameHash({ frameIndex: framesQuantity, hash }));
     dispatch(incrementFramesQuantity(1));
     dispatch(setRenderedFramesIndexes({ first: 0, last: frames.length - 1 }));
   };
@@ -49,10 +53,10 @@ const PreviewList = () => {
       alpha: new Uint8ClampedArray(frame.alpha),
     };
 
-    const hash = createHashSHA256(newFrame);
+    const hash = uuidv4();
     frames.splice(index, 0, newFrame);
 
-    dispatch(addFrameHash({ frameIndex: index, hash }));
+    dispatch(addFrameHash({ frameIndex: index + 1, hash }));
     dispatch(incrementFramesQuantity(1));
     dispatch(setRenderedFramesIndexes({ first: 0, last: frames.length - 1 }));
   };
@@ -70,15 +74,19 @@ const PreviewList = () => {
     }
 
     frames.splice(index, 1);
+    framesPNG.splice(index, 1);
+
 
     dispatch(deleteFrameHash(index));
     dispatch(incrementFramesQuantity(1));
     dispatch(setRenderedFramesIndexes({ first: 0, last: frames.length - 1 }));
   };
 
+  
   return (
     <div className="main__preview-list">
       {frames.map((frame, i) => {
+        const hash = frameHashes[i];
         return (
           <Frame
             copyFrame={copyFrame}
@@ -86,6 +94,7 @@ const PreviewList = () => {
             isSelected={selectedFrameIndex === i}
             index={i}
             frame={frame}
+            hash={hash}
             key={i}
           />
         );
